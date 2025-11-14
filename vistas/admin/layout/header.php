@@ -14,6 +14,7 @@ if (!isset($_SESSION['user_id']) || $_SESSION['rol'] !== 'admin') {
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <link rel="stylesheet" href="../../assets/css/estilos.css">
+    <link href="https://cdn.datatables.net/1.13.6/css/dataTables.bootstrap5.min.css" rel="stylesheet">
 </head>
 <body>
 
@@ -33,6 +34,12 @@ if (!isset($_SESSION['user_id']) || $_SESSION['rol'] !== 'admin') {
             </a>
             <a href="gestionar_cursos.php" class="list-group-item list-group-item-action bg-dark text-white">
                 <i class="fas fa-book me-2"></i>Cursos
+            </a>
+            <a href="gestionar_evaluaciones.php" class="list-group-item list-group-item-action bg-dark text-white">
+                <i class="fas fa-clipboard-check me-2"></i>Evaluaciones
+            </a>
+            <a href="gestionar_notas.php" class="list-group-item list-group-item-action bg-dark text-white">
+                <i class="fas fa-graduation-cap me-2"></i>Gestionar Notas
             </a>
             <a href="gestionar_matriculas.php" class="list-group-item list-group-item-action bg-dark text-white">
                 <i class="fas fa-clipboard-list me-2"></i>Matrículas
