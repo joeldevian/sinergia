@@ -114,8 +114,11 @@ if (isset($_SESSION['mensaje'])) {
 </div>
 
 <div class="card">
-    <div class="card-header">
+    <div class="card-header d-flex justify-content-between align-items-center">
         <h5 class="mb-0">Registro de Notas</h5>
+        <a href="../../controladores/generar_reporte_notas_curso_pdf.php?id_curso=<?php echo $id_curso; ?>" class="btn btn-info btn-sm" target="_blank">
+            <i class="fas fa-file-pdf me-2"></i>Descargar Reporte
+        </a>
     </div>
     <div class="card-body">
         <?php if (empty($estudiantes)): ?>

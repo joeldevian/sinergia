@@ -1,0 +1,62 @@
+--- Resumen del Proyecto: Sistema Web de Gestión Académica ---
+
+Fecha del Resumen: 14 de noviembre de 2025
+
+**Objetivo General del Proyecto:**
+Desarrollar un Sistema Web de Gestión Académica para INSTITUTO SINERGIA utilizando PHP, MySQL, HTML, CSS, JavaScript y Bootstrap.
+
+**Conocimientos Clave:**
+-   **Tecnologías:** PHP, MySQL, HTML, CSS, JavaScript, Bootstrap.
+-   **Base de Datos:** `sinergia` (funcional, esquema en `sinergia.sql`).
+-   **Directorio Raíz:** `C:\xampp\htdocs\sinergia`.
+-   **Credenciales de Prueba:**
+    -   Admin: `admin` (contraseña hash manual).
+    -   Docentes/Estudiantes: `password123` (hash corregido).
+-   **Estructura de Carpetas:** `config/`, `vistas/` (`admin/`, `docente/`, `estudiante/`), `controladores/`, `assets/`.
+-   **Autenticación:** Basada en roles (admin, docente, estudiante) con gestión de sesiones.
+-   **Datos de Prueba:** `datos_prueba.sql` es estable y se importa correctamente.
+
+**Estado Actual del Sistema (Funcionalidades Implementadas):**
+
+1.  **Autenticación y Paneles de Usuario:**
+    *   Login/Logout para Admin, Docente, Estudiante.
+    *   Paneles de control (`dashboard.php`) para cada rol.
+
+2.  **Panel de Administración (CRUD Completo):**
+    *   Gestión de Estudiantes (CRUD).
+    *   Gestión de Docentes (CRUD).
+    *   Gestión de Cursos (CRUD).
+    *   Gestión de Matrículas (CRUD).
+    *   Gestión de Asignaciones Docente-Curso (CRUD).
+    *   **NUEVO:** Configuración de Evaluaciones (CRUD para tipos de evaluación y porcentajes por curso).
+    *   **NUEVO:** Gestión de Notas (El administrador puede modificar notas de estudiantes para cualquier curso).
+    *   **NUEVO:** Tablas Interactivas (DataTables.js integrado en todas las tablas de gestión para búsqueda, paginación y ordenamiento).
+
+3.  **Panel de Docente:**
+    *   Visualización de "Mis Cursos" asignados.
+    *   Gestión de Notas por Curso (entrada y modificación de calificaciones).
+    *   Gestión de Asistencia por Curso (entrada y modificación de asistencia).
+    *   Navegación mejorada desde el dashboard a las páginas de selección de curso para Notas y Asistencia.
+
+4.  **Portal de Estudiante:**
+    *   Visualización de "Mis Calificaciones" (con cálculo de promedio ponderado).
+    *   Visualización de "Mi Horario".
+    *   Visualización de "Mi Asistencia".
+    *   Visualización de "Mis Pagos".
+    *   **NUEVO:** "Mi Perfil" (visualización de datos personales y funcionalidad de cambio de contraseña).
+    *   **NUEVO:** "Detalle del Curso" (información detallada del curso y docente asignado, accesible desde "Mi Horario").
+    *   **NUEVO:** Generación de "Boleta de Notas" en PDF (con formato mejorado).
+
+**Acciones Recientes y Correcciones:**
+-   Corrección de hash de contraseñas para usuarios de prueba.
+-   Ajuste de enlaces de navegación en el panel de docente.
+-   Implementación de DataTables.js en el panel de administrador.
+-   Implementación de CRUD para Evaluaciones en el panel de administrador.
+-   Implementación de gestión de notas para el administrador.
+-   Clarificación de nombres de enlaces en el panel de administrador ("Evaluaciones" renombrado a "Configuración de Evaluaciones").
+-   Implementación de generación de PDF para boleta de notas de estudiante, incluyendo depuración de la integración de FPDF y mejora de formato.
+
+**Próximos Pasos (Plan Pendiente):**
+-   Continuar con las mejoras propuestas o nuevas ideas del usuario.
+
+---

@@ -26,9 +26,14 @@ if (isset($_SESSION['mensaje'])) {
 <div class="card">
     <div class="card-header d-flex justify-content-between align-items-center">
         <h5 class="mb-0">Listado de Cursos</h5>
-        <a href="agregar_curso.php" class="btn btn-primary">
-            <i class="fas fa-plus me-2"></i>Agregar Curso
-        </a>
+        <div>
+            <a href="../../controladores/generar_listado_cursos_pdf.php" class="btn btn-info me-2" target="_blank">
+                <i class="fas fa-file-pdf me-2"></i>Exportar a PDF
+            </a>
+            <a href="agregar_curso.php" class="btn btn-primary">
+                <i class="fas fa-plus me-2"></i>Agregar Curso
+            </a>
+        </div>
     </div>
     <div class="card-body">
         <div class="table-responsive">

@@ -56,6 +56,11 @@ if (isset($_SESSION['mensaje'])) {
         <h5 class="mb-0">Detalle de Calificaciones</h5>
     </div>
     <div class="card-body">
+        <div class="d-flex justify-content-end mb-3">
+            <a href="../../controladores/generar_boleta_notas_pdf.php" target="_blank" class="btn btn-danger">
+                <i class="fas fa-file-pdf me-2"></i>Descargar Boleta de Notas
+            </a>
+        </div>
         <?php if (empty($calificaciones_por_curso)): ?>
             <p class="text-center">No tienes calificaciones registradas aún.</p>
         <?php else: ?>

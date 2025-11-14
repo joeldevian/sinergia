@@ -36,7 +36,7 @@ if (!isset($_SESSION['user_id']) || $_SESSION['rol'] !== 'admin') {
                 <i class="fas fa-book me-2"></i>Cursos
             </a>
             <a href="gestionar_evaluaciones.php" class="list-group-item list-group-item-action bg-dark text-white">
-                <i class="fas fa-clipboard-check me-2"></i>Evaluaciones
+                <i class="fas fa-clipboard-check me-2"></i>Configuración de Evaluaciones
             </a>
             <a href="gestionar_notas.php" class="list-group-item list-group-item-action bg-dark text-white">
                 <i class="fas fa-graduation-cap me-2"></i>Gestionar Notas

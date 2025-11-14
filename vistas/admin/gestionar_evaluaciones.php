@@ -23,7 +23,7 @@ if ($resultado_evaluaciones->num_rows > 0) {
 }
 ?>
 
-<h1 class="mb-4">Gestionar Evaluaciones</h1>
+<h1 class="mb-4">Configuración de Evaluaciones</h1>
 
 <?php
 if (isset($_SESSION['mensaje'])) {
@@ -39,7 +39,7 @@ if (isset($_SESSION['mensaje'])) {
 <!-- Form to add new evaluation -->
 <div class="card mb-4">
     <div class="card-header">
-        <h5 class="mb-0">Nueva Evaluación</h5>
+        <h5 class="mb-0">Nueva Configuración de Evaluación</h5>
     </div>
     <div class="card-body">
         <form action="../../controladores/evaluacion_controller.php" method="POST">
@@ -73,7 +73,7 @@ if (isset($_SESSION['mensaje'])) {
 <!-- Table of existing evaluations -->
 <div class="card">
     <div class="card-header">
-        <h5 class="mb-0">Evaluaciones Actuales</h5>
+        <h5 class="mb-0">Configuraciones de Evaluaciones Actuales</h5>
     </div>
     <div class="card-body">
         <?php if (empty($evaluaciones_por_curso)): ?>
