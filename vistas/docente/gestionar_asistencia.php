@@ -16,13 +16,11 @@ $stmt_docente_id->close();
 
 $cursos = [];
 if ($id_docente > 0) {
-    // Fetch courses assigned to this teacher using the new docente_curso table
+    // Fetch courses assigned to this teacher
     $query_cursos = "SELECT 
-                        c.id, c.codigo_curso, c.nombre_curso, c.creditos, c.horas_semanales, 
-                        ca.nombre_carrera, c.ciclo, c.tipo, dc.periodo_academico
+                        c.id, c.codigo_curso, c.nombre_curso, dc.periodo_academico
                      FROM docente_curso dc
                      JOIN cursos c ON dc.id_curso = c.id
-                     JOIN carreras ca ON c.id_carrera = ca.id
                      WHERE dc.id_docente = ?
                      ORDER BY dc.periodo_academico DESC, c.nombre_curso ASC";
     $stmt_cursos = $conexion->prepare($query_cursos);
@@ -37,22 +35,12 @@ if ($id_docente > 0) {
 }
 ?>
 
-<h1 class="mb-4">Mis Cursos</h1>
-
-<?php
-if (isset($_SESSION['mensaje'])) {
-    echo '<div class="alert alert-' . $_SESSION['mensaje_tipo'] . ' alert-dismissible fade show" role="alert">';
-    echo $_SESSION['mensaje'];
-    echo '<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>';
-    echo '</div>';
-    unset($_SESSION['mensaje']);
-    unset($_SESSION['mensaje_tipo']);
-}
-?>
+<h1 class="mb-4">Gestionar Asistencia</h1>
+<p>Selecciona un curso para registrar la asistencia de los estudiantes.</p>
 
 <div class="card">
     <div class="card-header">
-        <h5 class="mb-0">Cursos Asignados</h5>
+        <h5 class="mb-0">Mis Cursos Asignados</h5>
     </div>
     <div class="card-body">
         <div class="table-responsive">
@@ -62,8 +50,6 @@ if (isset($_SESSION['mensaje'])) {
                         <th>Periodo</th>
                         <th>Código</th>
                         <th>Nombre del Curso</th>
-                        <th>Carrera</th>
-                        <th>Ciclo</th>
                         <th>Acciones</th>
                     </tr>
                 </thead>
@@ -74,21 +60,16 @@ if (isset($_SESSION['mensaje'])) {
                                 <td><?php echo htmlspecialchars($curso['periodo_academico']); ?></td>
                                 <td><?php echo htmlspecialchars($curso['codigo_curso']); ?></td>
                                 <td><?php echo htmlspecialchars($curso['nombre_curso']); ?></td>
-                                <td><?php echo htmlspecialchars($curso['nombre_carrera']); ?></td>
-                                <td><?php echo htmlspecialchars($curso['ciclo']); ?></td>
                                 <td>
-                                    <a href="gestionar_notas_curso.php?id_curso=<?php echo $curso['id']; ?>" class="btn btn-sm btn-info" title="Gestionar Notas">
-                                        <i class="fas fa-graduation-cap"></i> Notas
-                                    </a>
                                     <a href="gestionar_asistencia_curso.php?id_curso=<?php echo $curso['id']; ?>" class="btn btn-sm btn-primary" title="Gestionar Asistencia">
-                                        <i class="fas fa-clipboard-check"></i> Asistencia
+                                        <i class="fas fa-clipboard-check"></i> Gestionar Asistencia
                                     </a>
                                 </td>
                             </tr>
                         <?php endforeach; ?>
                     <?php else: ?>
                         <tr>
-                            <td colspan="6" class="text-center">No tienes cursos asignados.</td>
+                            <td colspan="4" class="text-center">No tienes cursos asignados.</td>
                         </tr>
                     <?php endif; ?>
                 </tbody>

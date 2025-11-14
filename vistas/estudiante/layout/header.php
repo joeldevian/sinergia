@@ -54,7 +54,7 @@ if (!isset($_SESSION['user_id']) || $_SESSION['rol'] !== 'estudiante') {
                                 <i class="fas fa-user me-2"></i><?php echo htmlspecialchars($_SESSION['username']); ?>
                             </a>
                             <div class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdown">
-                                <a class="dropdown-item" href="#">Mi Perfil</a>
+                                <a class="dropdown-item" href="mi_perfil.php">Mi Perfil</a>
                                 <div class="dropdown-divider"></div>
                                 <a class="dropdown-item" href="../../controladores/logout_controller.php">Cerrar Sesión</a>
                             </div>

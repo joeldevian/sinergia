@@ -60,8 +60,21 @@ if (isset($_SESSION['mensaje'])) {
             <p class="text-center">No tienes calificaciones registradas aún.</p>
         <?php else: ?>
             <?php foreach ($calificaciones_por_curso as $nombre_curso => $calificaciones): ?>
+                <?php
+                    $promedio_ponderado = 0;
+                    foreach ($calificaciones as $calificacion) {
+                        if (is_numeric($calificacion['nota']) && is_numeric($calificacion['porcentaje'])) {
+                            $promedio_ponderado += $calificacion['nota'] * ($calificacion['porcentaje'] / 100);
+                        }
+                    }
+                ?>
                 <div class="mb-4">
-                    <h4>Curso: <?php echo htmlspecialchars($nombre_curso); ?></h4>
+                    <h4 class="d-flex justify-content-between align-items-center">
+                        <span>Curso: <?php echo htmlspecialchars($nombre_curso); ?></span>
+                        <span class="badge bg-primary rounded-pill fs-6">
+                            Promedio: <?php echo number_format($promedio_ponderado, 2); ?>
+                        </span>
+                    </h4>
                     <div class="table-responsive">
                         <table class="table table-striped table-bordered table-hover">
                             <thead class="table-light">

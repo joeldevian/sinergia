@@ -16,8 +16,9 @@ $stmt_estudiante_id->close();
 
 $horario_cursos = [];
 if ($id_estudiante > 0) {
-    // Fetch courses the student is enrolled in
+    // Fetch courses the student is enrolled in, including the course ID
     $query_horario = "SELECT 
+                        c.id,
                         c.nombre_curso,
                         c.codigo_curso,
                         c.horas_semanales,
@@ -76,7 +77,11 @@ if (isset($_SESSION['mensaje'])) {
                         <?php foreach ($horario_cursos as $curso): ?>
                             <tr>
                                 <td><?php echo htmlspecialchars($curso['codigo_curso']); ?></td>
-                                <td><?php echo htmlspecialchars($curso['nombre_curso']); ?></td>
+                                <td>
+                                    <a href="detalle_curso.php?id_curso=<?php echo $curso['id']; ?>">
+                                        <?php echo htmlspecialchars($curso['nombre_curso']); ?>
+                                    </a>
+                                </td>
                                 <td><?php echo htmlspecialchars($curso['nombre_carrera']); ?></td>
                                 <td><?php echo htmlspecialchars($curso['periodo_academico']); ?></td>
                                 <td><?php echo htmlspecialchars($curso['horas_semanales']); ?></td>

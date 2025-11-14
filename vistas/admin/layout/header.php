@@ -37,6 +37,9 @@ if (!isset($_SESSION['user_id']) || $_SESSION['rol'] !== 'admin') {
             <a href="gestionar_matriculas.php" class="list-group-item list-group-item-action bg-dark text-white">
                 <i class="fas fa-clipboard-list me-2"></i>Matrículas
             </a>
+            <a href="gestionar_asignaciones.php" class="list-group-item list-group-item-action bg-dark text-white">
+                <i class="fas fa-link me-2"></i>Asignaciones
+            </a>
         </div>
     </div>
     <!-- /#sidebar-wrapper -->
