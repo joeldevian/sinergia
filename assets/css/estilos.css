@@ -1,26 +1,86 @@
 /* Estilos personalizados para INSTITUTO SINERGIA */
 
+/* Importar fuentes */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Poppins:wght@300;400;500;600;700&display=swap');
+
+:root {
+    --primary-red: #CD1714;
+    --dark-red: #A41210;
+    --light-red-hover: rgba(255, 255, 255, 0.15);
+    --light-gray-bg: #f3f4f6;
+    --dark-text: #1f2937;
+    --white: #ffffff;
+    --soft-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+    --border-radius-md: 0.5rem;
+}
+
 body {
     overflow-x: hidden;
+    font-family: 'Inter', sans-serif; /* Usar Inter como fuente principal */
+    background-color: var(--light-gray-bg); /* Fondo general del área de contenido */
+    color: var(--dark-text); /* Color de texto general */
+}
+
+h1, h2, h3, h4, h5, h6 {
+    color: var(--dark-text);
+    font-family: 'Poppins', sans-serif; /* Poppins para títulos */
 }
 
 #sidebar-wrapper {
     min-height: 100vh;
     margin-left: -15rem;
     transition: margin .25s ease-out;
+    background-color: var(--primary-red); /* Fondo rojo institucional */
+    color: var(--white); /* Texto e iconos en blanco */
+    box-shadow: var(--soft-shadow); /* Sombra suave para la barra lateral */
 }
 
 #sidebar-wrapper .sidebar-heading {
     padding: 0.875rem 1.25rem;
-    font-size: 1.2rem;
+    font-size: 1.5rem; /* Aumentar tamaño de fuente para el título */
+    font-weight: 700;
+    color: var(--white);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.2); /* Separador sutil */
 }
 
 #sidebar-wrapper .list-group {
     width: 15rem;
+    --bs-list-group-bg: transparent; /* Fondo transparente para los items */
+    --bs-list-group-color: var(--white); /* Color de texto blanco */
+    --bs-list-group-border-color: transparent; /* Sin bordes entre items */
+}
+
+#sidebar-wrapper .list-group-item {
+    background-color: transparent;
+    color: var(--white);
+    padding: 0.75rem 1.25rem;
+    border: none; /* Eliminar bordes predeterminados */
+    transition: background-color 0.2s ease-in-out;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem; /* Espacio entre icono y texto */
+}
+
+#sidebar-wrapper .list-group-item:hover {
+    background-color: var(--light-red-hover); /* Hover rojo más claro/translúcido */
+    color: var(--white);
+}
+
+#sidebar-wrapper .list-group-item.active {
+    background-color: var(--dark-red); /* Fondo rojo más oscuro para seleccionado */
+    color: var(--white);
+    border-left: 5px solid var(--white); /* Borde lateral blanco para seleccionado */
+    padding-left: calc(1.25rem - 5px); /* Ajustar padding para compensar el borde */
+}
+
+#sidebar-wrapper .list-group-item i {
+    font-size: 1.1rem; /* Tamaño de icono */
 }
 
 #page-content-wrapper {
     min-width: 100vw;
+    background-color: var(--light-gray-bg); /* Fondo gris muy claro */
+    padding: 2rem; /* Añadir padding al contenido principal */
 }
 
 #wrapper.toggled #sidebar-wrapper {
@@ -40,4 +100,283 @@ body {
     #wrapper.toggled #sidebar-wrapper {
         margin-left: -15rem;
     }
+}
+
+/* Estilos para el área de contenido principal */
+.container-fluid {
+    padding: 0; /* Eliminar padding predeterminado si existe */
+}
+
+/* Estilos para tarjetas (ej. en dashboard) */
+.card {
+    border: none; /* Eliminar borde predeterminado */
+    border-radius: var(--border-radius-md); /* Bordes redondeados */
+    box-shadow: var(--soft-shadow); /* Sombra suave */
+    overflow: hidden; /* Para que el borde superior rojo se vea bien */
+}
+
+.card-header {
+    background-color: var(--white); /* Fondo blanco para el header de la tarjeta */
+    border-bottom: 1px solid #e0e0e0; /* Borde inferior sutil */
+    padding: 0.75rem 1.25rem;
+    font-weight: 600;
+    color: var(--dark-text);
+}
+
+/* Borde superior rojo para tarjetas del dashboard */
+.dashboard-card { /* Asumiendo que las tarjetas del dashboard tendrán esta clase */
+    border-top: 5px solid var(--primary-red);
+}
+
+.card-body {
+    background-color: var(--white); /* Fondo blanco para el cuerpo de la tarjeta */
+    padding: 1.25rem;
+}
+
+/* Estilos para botones dentro de tarjetas (ej. en dashboard) */
+.card .btn-primary,
+.card .btn-success,
+.card .btn-info,
+.card .btn-warning,
+.card .btn-danger,
+.card .btn-secondary {
+    border-radius: 0.3rem; /* Bordes redondeados para botones */
+    font-weight: 500;
+    transition: background-color 0.2s ease-in-out, border-color 0.2s ease-in-out;
+}
+
+/* Botones rojos específicos */
+.btn-primary { /* Asumiendo que los botones principales son btn-primary */
+    background-color: var(--primary-red);
+    border-color: var(--primary-red);
+}
+
+.btn-primary:hover {
+    background-color: var(--dark-red);
+    border-color: var(--dark-red);
+}
+
+/* Ajustes para DataTables */
+.dataTables_wrapper .dataTables_filter input,
+.dataTables_wrapper .dataTables_length select {
+    border-radius: 0.3rem;
+    border: 1px solid #ced4da;
+    padding: 0.375rem 1.25rem 0.375rem 0.5rem; /* Re-aplicado padding-left y padding-right */
+    box-shadow: none;
+    -webkit-appearance: none; /* Para controlar mejor el estilo de la flecha en algunos navegadores */
+    -moz-appearance: none;
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='%23343a40' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M2 5l6 6 6-6'/%3e%3c/svg%3e"); /* Flecha personalizada */
+    background-repeat: no-repeat;
+    background-position: right 0.5rem center;
+    background-size: 0.65em auto;
+}
+
+.dataTables_wrapper .dataTables_paginate .paginate_button {
+    border-radius: 0.3rem;
+    margin: 0 0.3rem; /* Ajustado el margen horizontal */
+    padding: 0.375rem 0.75rem; /* Añadido padding interno para el texto */
+    border: 1px solid #dee2e6;
+    background-color: var(--white);
+    color: var(--dark-text);
+}
+.dataTables_wrapper .dataTables_paginate .paginate_button.current,
+.dataTables_wrapper .dataTables_paginate .paginate_button.current:hover {
+    background-color: var(--primary-red);
+    border-color: var(--primary-red);
+    color: var(--white) !important;
+}
+
+.dataTables_wrapper .dataTables_paginate .paginate_button:hover {
+    background-color: #e9ecef;
+    border-color: #dee2e6;
+    color: var(--dark-text);
+}
+
+.table-dark {
+    --bs-table-bg: var(--dark-text);
+    --bs-table-border-color: #444;
+    color: var(--white);
+}
+
+.table-striped > tbody > tr:nth-of-type(odd) > * {
+    background-color: rgba(0, 0, 0, 0.03);
+}
+
+/* Alertas */
+.alert {
+    border-radius: var(--border-radius-md);
+    box-shadow: var(--soft-shadow);
+}
+
+/* Badges */
+.badge {
+    border-radius: 0.25rem;
+    font-weight: 600;
+}
+
+.badge.bg-success {
+    background-color: #28a745 !important; /* Mantener colores de estado */
+}
+.badge.bg-danger {
+    background-color: #dc3545 !important; /* Mantener colores de estado */
+}
+.badge.bg-warning {
+    background-color: #ffc107 !important; /* Mantener colores de estado */
+    color: #343a40 !important;
+}
+.badge.bg-secondary {
+    background-color: #6c757d !important; /* Mantener colores de estado */
+}
+
+/* Ajustes para el layout */
+#wrapper {
+    display: flex;
+}
+
+#page-content-wrapper {
+    flex-grow: 1;
+}
+
+/* Asegurar que los iconos de Font Awesome se vean bien */
+.fas, .far, .fal, .fab {
+    line-height: 1;
+}
+
+/* Estilos personalizados para Cards del Dashboard */
+.card-estudiantes {
+    background-color: #1E88E5; /* Azul */
+    color: var(--dark-text); /* Cambiado a texto oscuro */
+}
+.card-estudiantes .card-header {
+    background-color: rgba(0,0,0,0.1); /* Un poco más oscuro para el header */
+    color: var(--dark-text); /* Cambiado a texto oscuro */
+    border-bottom: 1px solid rgba(255,255,255,0.2);
+}
+.card-estudiantes .btn-light {
+    color: #1E88E5;
+}
+
+.card-docentes {
+    background-color: #FBC02D; /* Amarillo/Naranja */
+    color: var(--dark-text); /* Texto oscuro para fondo claro */
+}
+.card-docentes .card-header {
+    background-color: rgba(0,0,0,0.1);
+    color: var(--dark-text);
+    border-bottom: 1px solid rgba(0,0,0,0.1);
+}
+.card-docentes .btn-light {
+    color: #FBC02D;
+}
+
+.card-cursos {
+    background-color: #43A047; /* Verde */
+    color: var(--dark-text); /* Cambiado a texto oscuro */
+}
+.card-cursos .card-header {
+    background-color: rgba(0,0,0,0.1);
+    color: var(--dark-text); /* Cambiado a texto oscuro */
+    border-bottom: 1px solid rgba(255,255,255,0.2);
+}
+.card-cursos .btn-light {
+    color: #43A047;
+}
+
+/* Estilos para Cards del Dashboard de Docente */
+.card-mis-cursos {
+    background-color: #26A69A; /* Turquesa */
+    color: var(--dark-text);
+}
+.card-mis-cursos .card-header {
+    background-color: rgba(0,0,0,0.1);
+    color: var(--dark-text);
+    border-bottom: 1px solid rgba(0,0,0,0.1);
+}
+.card-mis-cursos .btn-light {
+    color: #26A69A;
+}
+
+.card-gestionar-notas {
+    background-color: #7E57C2; /* Morado */
+    color: var(--dark-text);
+}
+.card-gestionar-notas .card-header {
+    background-color: rgba(0,0,0,0.1);
+    color: var(--dark-text);
+    border-bottom: 1px solid rgba(0,0,0,0.1);
+}
+.card-gestionar-notas .btn-light {
+    color: #7E57C2;
+}
+
+.card-gestionar-asistencia {
+    background-color: #FF7043; /* Naranja */
+    color: var(--dark-text);
+}
+.card-gestionar-asistencia .card-header {
+    background-color: rgba(0,0,0,0.1);
+    color: var(--dark-text);
+    border-bottom: 1px solid rgba(0,0,0,0.1);
+}
+.card-gestionar-asistencia .btn-light {
+    color: #FF7043;
+}
+
+/* Estilos para Cards del Dashboard de Estudiante */
+.card-calificaciones {
+    background-color: #42A5F5; /* Azul */
+    color: var(--dark-text);
+}
+.card-calificaciones .card-header {
+    background-color: rgba(0,0,0,0.1);
+    color: var(--dark-text);
+    border-bottom: 1px solid rgba(0,0,0,0.1);
+}
+.card-calificaciones .btn-light {
+    color: #42A5F5;
+}
+
+.card-horario {
+    background-color: #26C6DA; /* Cian */
+    color: var(--dark-text);
+}
+.card-horario .card-header {
+    background-color: rgba(0,0,0,0.1);
+    color: var(--dark-text);
+    border-bottom: 1px solid rgba(0,0,0,0.1);
+}
+.card-horario .btn-light {
+    color: #26C6DA;
+}
+
+.card-asistencia {
+    background-color: #9CCC65; /* Verde Lima */
+    color: var(--dark-text);
+}
+.card-asistencia .card-header {
+    background-color: rgba(0,0,0,0.1);
+    color: var(--dark-text);
+    border-bottom: 1px solid rgba(0,0,0,0.1);
+}
+.card-asistencia .btn-light {
+    color: #9CCC65;
+}
+
+.card-pagos {
+    background-color: #FFCA28; /* Dorado */
+    color: var(--dark-text);
+}
+.card-pagos .card-header {
+    background-color: rgba(0,0,0,0.1);
+    color: var(--dark-text);
+    border-bottom: 1px solid rgba(0,0,0,0.1);
+}
+.card-pagos .btn-light {
+    color: #FFCA28;
+}
+
+/* Asegurar que todas las tarjetas en una fila tengan la misma altura */
+.row .card {
+    height: 100%;
 }

@@ -1,4 +1,6 @@
 <?php
+$includeDataTablesCss = true;
+$includeDataTablesJs = true;
 require_once 'layout/header.php';
 require_once '../../config/conexion.php';
 
@@ -61,7 +63,7 @@ if (isset($_SESSION['mensaje'])) {
                 <div class="mb-4">
                     <h4>Curso: <?php echo htmlspecialchars($nombre_curso); ?></h4>
                     <div class="table-responsive">
-                        <table class="table table-striped table-bordered table-hover">
+                        <table class="table table-striped table-bordered table-hover datatable">
                             <thead class="table-light">
                                 <tr>
                                     <th>Fecha</th>

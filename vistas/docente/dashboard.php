@@ -5,8 +5,8 @@
 <p>Desde aquí podrás gestionar tus cursos, notas y asistencia.</p>
 
 <div class="row">
-    <div class="col-md-4">
-        <div class="card text-white bg-primary mb-3">
+    <div class="col-md-4 mb-4">
+        <div class="card card-mis-cursos mb-3">
             <div class="card-header">Mis Cursos</div>
             <div class="card-body">
                 <h5 class="card-title">Ver Cursos Asignados</h5>
@@ -15,8 +15,8 @@
             </div>
         </div>
     </div>
-    <div class="col-md-4">
-        <div class="card text-white bg-success mb-3">
+    <div class="col-md-4 mb-4">
+        <div class="card card-gestionar-notas mb-3">
             <div class="card-header">Gestionar Notas</div>
             <div class="card-body">
                 <h5 class="card-title">Registrar y Editar Notas</h5>
@@ -25,8 +25,8 @@
             </div>
         </div>
     </div>
-    <div class="col-md-4">
-        <div class="card text-white bg-info mb-3">
+    <div class="col-md-4 mb-4">
+        <div class="card card-gestionar-asistencia mb-3">
             <div class="card-header">Gestionar Asistencia</div>
             <div class="card-body">
                 <h5 class="card-title">Registrar Asistencia</h5>

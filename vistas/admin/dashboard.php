@@ -5,8 +5,8 @@
 <p>Desde aquí podrás gestionar los diferentes módulos del sistema.</p>
 
 <div class="row">
-    <div class="col-md-4">
-        <div class="card text-white bg-primary mb-3">
+    <div class="col-md-4 mb-4">
+        <div class="card card-estudiantes mb-3">
             <div class="card-header">Estudiantes</div>
             <div class="card-body">
                 <h5 class="card-title">Gestionar Estudiantes</h5>
@@ -15,8 +15,8 @@
             </div>
         </div>
     </div>
-    <div class="col-md-4">
-        <div class="card text-white bg-success mb-3">
+    <div class="col-md-4 mb-4">
+        <div class="card card-docentes mb-3">
             <div class="card-header">Docentes</div>
             <div class="card-body">
                 <h5 class="card-title">Gestionar Docentes</h5>
@@ -25,8 +25,8 @@
             </div>
         </div>
     </div>
-    <div class="col-md-4">
-        <div class="card text-white bg-info mb-3">
+    <div class="col-md-4 mb-4">
+        <div class="card card-cursos mb-3">
             <div class="card-header">Cursos</div>
             <div class="card-body">
                 <h5 class="card-title">Gestionar Cursos</h5>
@@ -36,5 +36,4 @@
         </div>
     </div>
 </div>
-
 <?php require_once 'layout/footer.php'; ?>

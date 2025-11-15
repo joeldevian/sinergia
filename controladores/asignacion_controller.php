@@ -1,6 +1,6 @@
 <?php
 session_start();
-require_once '../config/conexion.php';
+require_once '../config/database.php'; // Use the new database functions
 
 if (!isset($_SESSION['user_id']) || $_SESSION['rol'] !== 'admin') {
     header("Location: ../index.php");
@@ -11,37 +11,30 @@ $accion = $_POST['accion'] ?? $_GET['accion'] ?? '';
 
 switch ($accion) {
     case 'agregar':
-        agregarAsignacion($conexion);
+        agregarAsignacion();
         break;
     case 'eliminar':
-        eliminarAsignacion($conexion);
+        eliminarAsignacion();
         break;
 }
 
-function agregarAsignacion($conexion) {
+function agregarAsignacion() {
     try {
         $id_docente = $_POST['id_docente'];
         $id_curso = $_POST['id_curso'];
         $periodo_academico = $_POST['periodo_academico'];
 
-        $stmt = $conexion->prepare(
-            "INSERT INTO docente_curso (id_docente, id_curso, periodo_academico) 
-             VALUES (?, ?, ?)"
-        );
-        $stmt->bind_param(
-            "iis",
-            $id_docente,
-            $id_curso,
-            $periodo_academico
-        );
-        $stmt->execute();
-        $stmt->close();
+        $sql = "INSERT INTO docente_curso (id_docente, id_curso, periodo_academico) VALUES (?, ?, ?)";
+        
+        if (!execute_cud($sql, "iis", [$id_docente, $id_curso, $periodo_academico])) {
+            throw new Exception("No se pudo crear la asignación.");
+        }
 
         $_SESSION['mensaje'] = "Asignación creada exitosamente.";
         $_SESSION['mensaje_tipo'] = "success";
 
-    } catch (mysqli_sql_exception $e) {
-        if ($e->getCode() == 1062) { // Error for duplicate entry
+    } catch (Exception $e) {
+        if (method_exists($e, 'getCode') && $e->getCode() == 1062) { // Error for duplicate entry
             $_SESSION['mensaje'] = "Error: Esta asignación (docente, curso, periodo) ya existe.";
         } else {
             $_SESSION['mensaje'] = "Error al crear la asignación: " . $e->getMessage();
@@ -49,12 +42,11 @@ function agregarAsignacion($conexion) {
         $_SESSION['mensaje_tipo'] = "danger";
     }
 
-    $conexion->close();
     header("Location: ../vistas/admin/gestionar_asignaciones.php");
     exit();
 }
 
-function eliminarAsignacion($conexion) {
+function eliminarAsignacion() {
     $id_asignacion = $_GET['id'] ?? 0;
 
     if ($id_asignacion == 0) {
@@ -62,21 +54,20 @@ function eliminarAsignacion($conexion) {
         $_SESSION['mensaje_tipo'] = "danger";
     } else {
         try {
-            $stmt = $conexion->prepare("DELETE FROM docente_curso WHERE id = ?");
-            $stmt->bind_param("i", $id_asignacion);
-            $stmt->execute();
-            $stmt->close();
+            $sql = "DELETE FROM docente_curso WHERE id = ?";
+            if (!execute_cud($sql, "i", [$id_asignacion])) {
+                throw new Exception("No se pudo eliminar la asignación.");
+            }
 
             $_SESSION['mensaje'] = "Asignación eliminada exitosamente.";
             $_SESSION['mensaje_tipo'] = "success";
 
-        } catch (mysqli_sql_exception $e) {
+        } catch (Exception $e) {
             $_SESSION['mensaje'] = "Error al eliminar la asignación: " . $e->getMessage();
             $_SESSION['mensaje_tipo'] = "danger";
         }
     }
 
-    $conexion->close();
     header("Location: ../vistas/admin/gestionar_asignaciones.php");
     exit();
 }

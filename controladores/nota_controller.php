@@ -1,6 +1,6 @@
 <?php
 session_start();
-require_once '../config/conexion.php';
+require_once '../config/database.php'; // Use the new database functions
 
 if (!isset($_SESSION['user_id']) || $_SESSION['rol'] !== 'docente') {
     header("Location: ../index.php");
@@ -9,13 +9,17 @@ if (!isset($_SESSION['user_id']) || $_SESSION['rol'] !== 'docente') {
 
 $accion = $_POST['accion'] ?? $_GET['accion'] ?? '';
 
+// The global $conexion is still needed for transactions
+global $conexion;
+
 switch ($accion) {
     case 'guardar_notas':
-        guardarNotas($conexion);
+        guardarNotas();
         break;
 }
 
-function guardarNotas($conexion) {
+function guardarNotas() {
+    global $conexion;
     $id_curso = $_POST['id_curso'] ?? 0;
     $notas_enviadas = $_POST['notas'] ?? [];
     $registrado_por = $_SESSION['user_id'];
@@ -39,25 +43,22 @@ function guardarNotas($conexion) {
                 }
 
                 // Verificar si la nota ya existe
-                $stmt_check = $conexion->prepare("SELECT id FROM notas WHERE id_estudiante = ? AND id_evaluacion = ?");
-                $stmt_check->bind_param("ii", $id_estudiante, $id_evaluacion);
-                $stmt_check->execute();
-                $resultado_check = $stmt_check->get_result();
+                $sql_check = "SELECT id FROM notas WHERE id_estudiante = ? AND id_evaluacion = ?";
+                $existing_note = select_one($sql_check, "ii", [$id_estudiante, $id_evaluacion]);
 
-                if ($resultado_check->num_rows > 0) {
+                if ($existing_note) {
                     // Actualizar nota existente
-                    $stmt_update = $conexion->prepare("UPDATE notas SET nota = ?, fecha_registro = NOW(), registrado_por = ? WHERE id_estudiante = ? AND id_evaluacion = ?");
-                    $stmt_update->bind_param("diii", $nota_float, $registrado_por, $id_estudiante, $id_evaluacion);
-                    $stmt_update->execute();
-                    $stmt_update->close();
+                    $sql_update = "UPDATE notas SET nota = ?, fecha_registro = NOW(), registrado_por = ? WHERE id_estudiante = ? AND id_evaluacion = ?";
+                    if (!execute_cud($sql_update, "diii", [$nota_float, $registrado_por, $id_estudiante, $id_evaluacion])) {
+                        throw new Exception("Error al actualizar la nota para el estudiante {$id_estudiante} en la evaluación {$id_evaluacion}.");
+                    }
                 } else {
                     // Insertar nueva nota
-                    $stmt_insert = $conexion->prepare("INSERT INTO notas (id_estudiante, id_evaluacion, nota, registrado_por) VALUES (?, ?, ?, ?)");
-                    $stmt_insert->bind_param("iidi", $id_estudiante, $id_evaluacion, $nota_float, $registrado_por);
-                    $stmt_insert->execute();
-                    $stmt_insert->close();
+                    $sql_insert = "INSERT INTO notas (id_estudiante, id_evaluacion, nota, registrado_por) VALUES (?, ?, ?, ?)";
+                    if (!execute_cud($sql_insert, "iidi", [$id_estudiante, $id_evaluacion, $nota_float, $registrado_por])) {
+                        throw new Exception("Error al insertar la nota para el estudiante {$id_estudiante} en la evaluación {$id_evaluacion}.");
+                    }
                 }
-                $stmt_check->close();
             }
         }
 
@@ -71,7 +72,6 @@ function guardarNotas($conexion) {
         $_SESSION['mensaje_tipo'] = "danger";
     }
 
-    $conexion->close();
     header("Location: ../vistas/docente/gestionar_notas_curso.php?id_curso=" . $id_curso);
     exit();
 }

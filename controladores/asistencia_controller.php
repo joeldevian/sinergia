@@ -1,6 +1,6 @@
 <?php
 session_start();
-require_once '../config/conexion.php';
+require_once '../config/database.php'; // Use the new database functions
 
 if (!isset($_SESSION['user_id']) || $_SESSION['rol'] !== 'docente') {
     header("Location: ../index.php");
@@ -9,13 +9,17 @@ if (!isset($_SESSION['user_id']) || $_SESSION['rol'] !== 'docente') {
 
 $accion = $_POST['accion'] ?? $_GET['accion'] ?? '';
 
+// The global $conexion is still needed for transactions
+global $conexion;
+
 switch ($accion) {
     case 'guardar_asistencia':
-        guardarAsistencia($conexion);
+        guardarAsistencia();
         break;
 }
 
-function guardarAsistencia($conexion) {
+function guardarAsistencia() {
+    global $conexion;
     $id_curso = $_POST['id_curso'] ?? 0;
     $fecha = $_POST['fecha'] ?? '';
     $asistencia_enviada = $_POST['asistencia'] ?? [];
@@ -33,25 +37,22 @@ function guardarAsistencia($conexion) {
     try {
         foreach ($asistencia_enviada as $id_estudiante => $estado) {
             // Verificar si el registro de asistencia ya existe
-            $stmt_check = $conexion->prepare("SELECT id FROM asistencia WHERE id_estudiante = ? AND id_curso = ? AND fecha = ?");
-            $stmt_check->bind_param("iis", $id_estudiante, $id_curso, $fecha);
-            $stmt_check->execute();
-            $resultado_check = $stmt_check->get_result();
+            $sql_check = "SELECT id FROM asistencia WHERE id_estudiante = ? AND id_curso = ? AND fecha = ?";
+            $existing_attendance = select_one($sql_check, "iis", [$id_estudiante, $id_curso, $fecha]);
 
-            if ($resultado_check->num_rows > 0) {
+            if ($existing_attendance) {
                 // Actualizar asistencia existente
-                $stmt_update = $conexion->prepare("UPDATE asistencia SET estado = ?, registrado_por = ? WHERE id_estudiante = ? AND id_curso = ? AND fecha = ?");
-                $stmt_update->bind_param("siiss", $estado, $registrado_por, $id_estudiante, $id_curso, $fecha);
-                $stmt_update->execute();
-                $stmt_update->close();
+                $sql_update = "UPDATE asistencia SET estado = ?, registrado_por = ? WHERE id_estudiante = ? AND id_curso = ? AND fecha = ?";
+                if (!execute_cud($sql_update, "siiss", [$estado, $registrado_por, $id_estudiante, $id_curso, $fecha])) {
+                    throw new Exception("Error al actualizar la asistencia para el estudiante {$id_estudiante}.");
+                }
             } else {
                 // Insertar nuevo registro de asistencia
-                $stmt_insert = $conexion->prepare("INSERT INTO asistencia (id_estudiante, id_curso, fecha, estado, registrado_por) VALUES (?, ?, ?, ?, ?)");
-                $stmt_insert->bind_param("iissi", $id_estudiante, $id_curso, $fecha, $estado, $registrado_por);
-                $stmt_insert->execute();
-                $stmt_insert->close();
+                $sql_insert = "INSERT INTO asistencia (id_estudiante, id_curso, fecha, estado, registrado_por) VALUES (?, ?, ?, ?, ?)";
+                if (!execute_cud($sql_insert, "iissi", [$id_estudiante, $id_curso, $fecha, $estado, $registrado_por])) {
+                    throw new Exception("Error al insertar la asistencia para el estudiante {$id_estudiante}.");
+                }
             }
-            $stmt_check->close();
         }
 
         $conexion->commit();
@@ -64,7 +65,6 @@ function guardarAsistencia($conexion) {
         $_SESSION['mensaje_tipo'] = "danger";
     }
 
-    $conexion->close();
     header("Location: ../vistas/docente/gestionar_asistencia_curso.php?id_curso=" . $id_curso . "&fecha=" . $fecha);
     exit();
 }

@@ -1,6 +1,6 @@
 <?php
 session_start();
-require_once '../config/conexion.php';
+require_once '../config/database.php'; // Use the new database functions
 
 if (!isset($_SESSION['user_id'])) {
     header("Location: ../index.php");
@@ -10,37 +10,64 @@ if (!isset($_SESSION['user_id'])) {
 $accion = $_POST['accion'] ?? '';
 
 if ($accion == 'cambiar_password') {
-    cambiarPassword($conexion);
+    cambiarPassword();
 } else {
     // Redirect if the action is not recognized
-    header("Location: ../vistas/estudiante/dashboard.php");
+    // Determine redirect based on user role if possible, otherwise default to student dashboard
+    $redirect_url = '../vistas/estudiante/dashboard.php'; // Default
+    if (isset($_SESSION['rol'])) {
+        switch ($_SESSION['rol']) {
+            case 'admin':
+                $redirect_url = '../vistas/admin/dashboard.php';
+                break;
+            case 'docente':
+                $redirect_url = '../vistas/docente/dashboard.php';
+                break;
+            case 'estudiante':
+                $redirect_url = '../vistas/estudiante/dashboard.php';
+                break;
+        }
+    }
+    header("Location: " . $redirect_url);
     exit();
 }
 
-function cambiarPassword($conexion) {
+function cambiarPassword() {
     $id_user = $_SESSION['user_id'];
     $password_actual = $_POST['password_actual'];
     $password_nueva = $_POST['password_nueva'];
     $password_confirmar = $_POST['password_confirmar'];
 
+    // Determine redirect URL based on user role
+    $redirect_page = '../vistas/estudiante/mi_perfil.php'; // Default
+    if (isset($_SESSION['rol'])) {
+        switch ($_SESSION['rol']) {
+            case 'admin':
+                $redirect_page = '../vistas/admin/dashboard.php'; // Admin doesn't have mi_perfil.php
+                break;
+            case 'docente':
+                $redirect_page = '../vistas/docente/dashboard.php'; // Docente doesn't have mi_perfil.php
+                break;
+            case 'estudiante':
+                $redirect_page = '../vistas/estudiante/mi_perfil.php';
+                break;
+        }
+    }
+
+
     // 1. Check if new passwords match
     if ($password_nueva !== $password_confirmar) {
         $_SESSION['mensaje_perfil'] = "La nueva contraseña y su confirmación no coinciden.";
         $_SESSION['mensaje_perfil_tipo'] = "danger";
-        header("Location: ../vistas/estudiante/mi_perfil.php");
+        header("Location: " . $redirect_page);
         exit();
     }
 
     // 2. Get current password hash from DB
-    $stmt = $conexion->prepare("SELECT password_hash FROM users WHERE id = ?");
-    $stmt->bind_param("i", $id_user);
-    $stmt->execute();
-    $resultado = $stmt->get_result();
-    $user = $resultado->fetch_assoc();
-    $stmt->close();
+    $user = select_one("SELECT password_hash FROM users WHERE id = ?", "i", [$id_user]);
 
     if (!$user) {
-        // This should not happen
+        // This should not happen, user not found
         session_destroy();
         header("Location: ../index.php");
         exit();
@@ -50,26 +77,22 @@ function cambiarPassword($conexion) {
     if (!password_verify($password_actual, $user['password_hash'])) {
         $_SESSION['mensaje_perfil'] = "La contraseña actual es incorrecta.";
         $_SESSION['mensaje_perfil_tipo'] = "danger";
-        header("Location: ../vistas/estudiante/mi_perfil.php");
+        header("Location: " . $redirect_page);
         exit();
     }
 
     // 4. Hash and update new password
     $nuevo_hash = password_hash($password_nueva, PASSWORD_DEFAULT);
-    $stmt_update = $conexion->prepare("UPDATE users SET password_hash = ? WHERE id = ?");
-    $stmt_update->bind_param("si", $nuevo_hash, $id_user);
     
-    if ($stmt_update->execute()) {
+    if (execute_cud("UPDATE users SET password_hash = ? WHERE id = ?", "si", [$nuevo_hash, $id_user])) {
         $_SESSION['mensaje_perfil'] = "Contraseña actualizada exitosamente.";
         $_SESSION['mensaje_perfil_tipo'] = "success";
     } else {
         $_SESSION['mensaje_perfil'] = "Error al actualizar la contraseña. Inténtalo de nuevo.";
         $_SESSION['mensaje_perfil_tipo'] = "danger";
     }
-    $stmt_update->close();
-    $conexion->close();
 
-    header("Location: ../vistas/estudiante/mi_perfil.php");
+    header("Location: " . $redirect_page);
     exit();
 }
 ?>

@@ -1,4 +1,6 @@
 <?php
+$includeDataTablesCss = true;
+$includeDataTablesJs = true;
 require_once 'layout/header.php';
 require_once '../../config/conexion.php';
 
@@ -111,7 +113,7 @@ if (isset($_SESSION['mensaje'])) {
                 <input type="hidden" name="id_curso" value="<?php echo $id_curso; ?>">
                 <input type="hidden" name="fecha" value="<?php echo htmlspecialchars($fecha_seleccionada); ?>">
                 <div class="table-responsive">
-                    <table class="table table-striped table-bordered table-hover">
+                    <table class="table table-striped table-bordered table-hover datatable">
                         <thead class="table-dark">
                             <tr>
                                 <th>Estudiante</th>

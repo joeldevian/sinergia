@@ -1,4 +1,6 @@
 <?php
+$includeDataTablesCss = true;
+$includeDataTablesJs = true;
 require_once 'layout/header.php';
 require_once '../../config/conexion.php';
 
@@ -44,7 +46,7 @@ if ($id_docente > 0) {
     </div>
     <div class="card-body">
         <div class="table-responsive">
-            <table class="table table-striped table-bordered table-hover">
+            <table class="table table-striped table-bordered table-hover datatable">
                 <thead class="table-dark">
                     <tr>
                         <th>Periodo</th>

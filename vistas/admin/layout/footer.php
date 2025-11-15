@@ -1,31 +1,4 @@
-        </div>
-    </div>
-    <!-- /#page-content-wrapper -->
-</div>
-<!-- /#wrapper -->
-
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
-<script src="https://code.jquery.com/jquery-3.7.0.js"></script>
-<script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
-<script src="https://cdn.datatables.net/1.13.6/js/dataTables.bootstrap5.min.js"></script>
-
-<!-- Menu Toggle Script -->
-<script>
-    document.getElementById("menu-toggle").addEventListener("click", function(e) {
-        e.preventDefault();
-        document.getElementById("wrapper").classList.toggle("toggled");
-    });
-</script>
-
-<!-- DataTables Initialization Script -->
-<script>
-    $(document).ready(function() {
-        $('.datatable').DataTable({
-            "language": {
-                "url": "//cdn.datatables.net/plug-ins/1.13.6/i18n/es-ES.json"
-            }
-        });
-    });
-</script>
-</body>
-</html>
+<?php
+$includeDataTablesJs = true; // Admin section uses DataTables JS
+require_once '../../vistas/layout/footer.php';
+?>

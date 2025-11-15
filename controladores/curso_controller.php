@@ -1,9 +1,8 @@
 <?php
 session_start();
-require_once '../config/conexion.php';
+require_once '../config/database.php'; // Use the new database functions
 
 if (!isset($_SESSION['user_id']) || $_SESSION['rol'] !== 'admin') {
-    // Redirect to login if not authenticated as admin
     header("Location: ../index.php");
     exit();
 }
@@ -12,17 +11,17 @@ $accion = $_POST['accion'] ?? $_GET['accion'] ?? '';
 
 switch ($accion) {
     case 'agregar':
-        agregarCurso($conexion);
+        agregarCurso();
         break;
     case 'editar':
-        editarCurso($conexion);
+        editarCurso();
         break;
     case 'eliminar':
-        eliminarCurso($conexion);
+        eliminarCurso();
         break;
 }
 
-function agregarCurso($conexion) {
+function agregarCurso() {
     try {
         $codigo_curso = $_POST['codigo_curso'];
         $nombre_curso = $_POST['nombre_curso'];
@@ -32,48 +31,37 @@ function agregarCurso($conexion) {
         $ciclo = $_POST['ciclo'];
         $tipo = $_POST['tipo'];
 
-        $stmt = $conexion->prepare(
-            "INSERT INTO cursos (codigo_curso, nombre_curso, creditos, horas_semanales, id_carrera, ciclo, tipo) 
-             VALUES (?, ?, ?, ?, ?, ?, ?)"
-        );
-        $stmt->bind_param(
-            "ssiiiss",
-            $codigo_curso,
-            $nombre_curso,
-            $creditos,
-            $horas_semanales,
-            $id_carrera,
-            $ciclo,
-            $tipo
-        );
-        $stmt->execute();
-        $stmt->close();
+        $sql = "INSERT INTO cursos (codigo_curso, nombre_curso, creditos, horas_semanales, id_carrera, ciclo, tipo) 
+                VALUES (?, ?, ?, ?, ?, ?, ?)";
+        
+        $params = [
+            $codigo_curso, $nombre_curso, $creditos, $horas_semanales,
+            $id_carrera, $ciclo, $tipo
+        ];
+
+        if (!execute_cud($sql, "ssiiiss", $params)) {
+            throw new Exception("No se pudo agregar el curso.");
+        }
 
         $_SESSION['mensaje'] = "Curso agregado exitosamente.";
         $_SESSION['mensaje_tipo'] = "success";
 
-    } catch (mysqli_sql_exception $e) {
-        if ($e->getCode() == 1062) { // Código de error para entrada duplicada
-            if (strpos($e->getMessage(), 'uq_cursos_codigo') !== false) {
-                $_SESSION['mensaje'] = "Error: El código de curso '{$codigo_curso}' ya existe.";
-            } else {
-                $_SESSION['mensaje'] = "Error al agregar curso: Entrada duplicada no especificada.";
-            }
+    } catch (Exception $e) {
+        if (method_exists($e, 'getCode') && $e->getCode() == 1062) {
+            $_SESSION['mensaje'] = "Error: El código de curso '{$_POST['codigo_curso']}' ya existe.";
         } else {
             $_SESSION['mensaje'] = "Error al agregar curso: " . $e->getMessage();
         }
         $_SESSION['mensaje_tipo'] = "danger";
     }
 
-    $conexion->close();
     header("Location: ../vistas/admin/gestionar_cursos.php");
     exit();
 }
 
-function editarCurso($conexion) {
-    $id_curso = $_POST['id_curso'];
-
+function editarCurso() {
     try {
+        $id_curso = $_POST['id_curso'];
         $codigo_curso = $_POST['codigo_curso'];
         $nombre_curso = $_POST['nombre_curso'];
         $creditos = $_POST['creditos'];
@@ -83,43 +71,37 @@ function editarCurso($conexion) {
         $tipo = $_POST['tipo'];
         $estado = $_POST['estado'];
 
-        $stmt = $conexion->prepare(
-            "UPDATE cursos SET 
-             codigo_curso = ?, nombre_curso = ?, creditos = ?, horas_semanales = ?, 
-             id_carrera = ?, ciclo = ?, tipo = ?, estado = ?
-             WHERE id = ?"
-        );
-        $stmt->bind_param(
-            "ssiiisssi",
+        $sql = "UPDATE cursos SET 
+                codigo_curso = ?, nombre_curso = ?, creditos = ?, horas_semanales = ?, 
+                id_carrera = ?, ciclo = ?, tipo = ?, estado = ?
+                WHERE id = ?";
+        
+        $params = [
             $codigo_curso, $nombre_curso, $creditos, $horas_semanales,
-            $id_carrera, $ciclo, $tipo, $estado,
-            $id_curso
-        );
-        $stmt->execute();
-        $stmt->close();
+            $id_carrera, $ciclo, $tipo, $estado, $id_curso
+        ];
+
+        if (!execute_cud($sql, "ssiiisssi", $params)) {
+            throw new Exception("No se pudo actualizar el curso.");
+        }
 
         $_SESSION['mensaje'] = "Curso actualizado exitosamente.";
         $_SESSION['mensaje_tipo'] = "success";
 
-    } catch (mysqli_sql_exception $e) {
-        if ($e->getCode() == 1062) { // Código de error para entrada duplicada
-            if (strpos($e->getMessage(), 'uq_cursos_codigo') !== false) {
-                $_SESSION['mensaje'] = "Error: El código de curso '{$codigo_curso}' ya existe.";
-            } else {
-                $_SESSION['mensaje'] = "Error al actualizar curso: Entrada duplicada no especificada.";
-            }
+    } catch (Exception $e) {
+        if (method_exists($e, 'getCode') && $e->getCode() == 1062) {
+            $_SESSION['mensaje'] = "Error: El código de curso '{$_POST['codigo_curso']}' ya existe.";
         } else {
             $_SESSION['mensaje'] = "Error al actualizar curso: " . $e->getMessage();
         }
         $_SESSION['mensaje_tipo'] = "danger";
     }
 
-    $conexion->close();
     header("Location: ../vistas/admin/gestionar_cursos.php");
     exit();
 }
 
-function eliminarCurso($conexion) {
+function eliminarCurso() {
     $id_curso = $_GET['id'] ?? 0;
 
     if ($id_curso == 0) {
@@ -130,68 +112,19 @@ function eliminarCurso($conexion) {
     }
 
     try {
-        $stmt = $conexion->prepare("DELETE FROM cursos WHERE id = ?");
-        $stmt->bind_param("i", $id_curso);
-        $stmt->execute();
-        $stmt->close();
+        $sql = "DELETE FROM cursos WHERE id = ?";
+        if (!execute_cud($sql, "i", [$id_curso])) {
+            throw new Exception("No se pudo eliminar el curso.");
+        }
 
         $_SESSION['mensaje'] = "Curso eliminado exitosamente.";
         $_SESSION['mensaje_tipo'] = "success";
 
-    } catch (mysqli_sql_exception $e) {
+    } catch (Exception $e) {
         $_SESSION['mensaje'] = "Error al eliminar el curso: " . $e->getMessage();
         $_SESSION['mensaje_tipo'] = "danger";
     }
 
-    $conexion->close();
-    header("Location: ../vistas/admin/gestionar_cursos.php");
-    exit();
-}
-
-function agregarCurso($conexion) {
-    try {
-        $codigo_curso = $_POST['codigo_curso'];
-        $nombre_curso = $_POST['nombre_curso'];
-        $creditos = $_POST['creditos'];
-        $horas_semanales = $_POST['horas_semanales'];
-        $id_carrera = $_POST['id_carrera'];
-        $ciclo = $_POST['ciclo'];
-        $tipo = $_POST['tipo'];
-
-        $stmt = $conexion->prepare(
-            "INSERT INTO cursos (codigo_curso, nombre_curso, creditos, horas_semanales, id_carrera, ciclo, tipo) 
-             VALUES (?, ?, ?, ?, ?, ?, ?)"
-        );
-        $stmt->bind_param(
-            "ssiiiss",
-            $codigo_curso,
-            $nombre_curso,
-            $creditos,
-            $horas_semanales,
-            $id_carrera,
-            $ciclo,
-            $tipo
-        );
-        $stmt->execute();
-        $stmt->close();
-
-        $_SESSION['mensaje'] = "Curso agregado exitosamente.";
-        $_SESSION['mensaje_tipo'] = "success";
-
-    } catch (mysqli_sql_exception $e) {
-        if ($e->getCode() == 1062) { // Código de error para entrada duplicada
-            if (strpos($e->getMessage(), 'uq_cursos_codigo') !== false) {
-                $_SESSION['mensaje'] = "Error: El código de curso '{$codigo_curso}' ya existe.";
-            } else {
-                $_SESSION['mensaje'] = "Error al agregar curso: Entrada duplicada no especificada.";
-            }
-        } else {
-            $_SESSION['mensaje'] = "Error al agregar curso: " . $e->getMessage();
-        }
-        $_SESSION['mensaje_tipo'] = "danger";
-    }
-
-    $conexion->close();
     header("Location: ../vistas/admin/gestionar_cursos.php");
     exit();
 }

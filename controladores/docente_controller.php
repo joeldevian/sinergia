@@ -1,29 +1,32 @@
 <?php
 session_start();
-require_once '../config/conexion.php';
+// Incluir las nuevas funciones de base de datos. Esto también incluye 'conexion.php'
+require_once '../config/database.php';
 
 if (!isset($_SESSION['user_id']) || $_SESSION['rol'] !== 'admin') {
-    // Redirect to login if not authenticated as admin
     header("Location: ../index.php");
     exit();
 }
 
 $accion = $_POST['accion'] ?? $_GET['accion'] ?? '';
 
+// La conexión global sigue siendo necesaria para manejar las transacciones
+global $conexion;
+
 switch ($accion) {
     case 'agregar':
-        agregarDocente($conexion);
+        agregarDocente();
         break;
     case 'editar':
-        editarDocente($conexion);
+        editarDocente();
         break;
     case 'eliminar':
-        eliminarDocente($conexion);
+        eliminarDocente();
         break;
 }
 
-function agregarDocente($conexion) {
-    // Iniciar transacción
+function agregarDocente() {
+    global $conexion;
     $conexion->begin_transaction();
 
     try {
@@ -33,11 +36,11 @@ function agregarDocente($conexion) {
         $password_hash = password_hash($password, PASSWORD_DEFAULT);
         $rol = 'docente';
 
-        $stmt_user = $conexion->prepare("INSERT INTO users (username, password_hash, rol) VALUES (?, ?, ?)");
-        $stmt_user->bind_param("sss", $username, $password_hash, $rol);
-        $stmt_user->execute();
-        $id_user = $conexion->insert_id;
-        $stmt_user->close();
+        $sql_user = "INSERT INTO users (username, password_hash, rol) VALUES (?, ?, ?)";
+        if (!execute_cud($sql_user, "sss", [$username, $password_hash, $rol])) {
+            throw new Exception("No se pudo crear el usuario.");
+        }
+        $id_user = last_insert_id();
 
         // 2. Crear el docente
         $codigo_docente = $_POST['codigo_docente'];
@@ -49,60 +52,37 @@ function agregarDocente($conexion) {
         $telefono = $_POST['telefono'];
         $email = $_POST['email'];
 
-        $stmt_docente = $conexion->prepare(
-            "INSERT INTO docentes (codigo_docente, dni, apellido_paterno, apellido_materno, nombres, especialidad, telefono, email, id_user) 
-             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)"
-        );
-        $stmt_docente->bind_param(
-            "ssssssssi",
-            $codigo_docente,
-            $dni,
-            $apellido_paterno,
-            $apellido_materno,
-            $nombres,
-            $especialidad,
-            $telefono,
-            $email,
-            $id_user
-        );
-        $stmt_docente->execute();
-        $stmt_docente->close();
+        $sql_docente = "INSERT INTO docentes (codigo_docente, dni, apellido_paterno, apellido_materno, nombres, especialidad, telefono, email, id_user) 
+                        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
+        $params_docente = [
+            $codigo_docente, $dni, $apellido_paterno, $apellido_materno, $nombres,
+            $especialidad, $telefono, $email, $id_user
+        ];
+        if (!execute_cud($sql_docente, "ssssssssi", $params_docente)) {
+            throw new Exception("No se pudo crear el registro del docente.");
+        }
 
-        // Si todo fue bien, confirmar la transacción
         $conexion->commit();
-        
         $_SESSION['mensaje'] = "Docente agregado exitosamente.";
         $_SESSION['mensaje_tipo'] = "success";
 
-    } catch (mysqli_sql_exception $e) {
-        // Si algo falla, revertir la transacción
+    } catch (Exception $e) {
         $conexion->rollback();
-
-        // Manejar errores de duplicados
-        if ($e->getCode() == 1062) { // Código de error para entrada duplicada
-            if (strpos($e->getMessage(), 'uq_users_username') !== false) {
-                $_SESSION['mensaje'] = "Error: El nombre de usuario '{$username}' ya existe.";
-            } elseif (strpos($e->getMessage(), 'uq_docentes_codigo') !== false) {
-                $_SESSION['mensaje'] = "Error: El código de docente '{$codigo_docente}' ya existe.";
-            } elseif (strpos($e->getMessage(), 'uq_docentes_dni') !== false) {
-                $_SESSION['mensaje'] = "Error: El DNI '{$dni}' ya está registrado.";
-            } elseif (strpos($e->getMessage(), 'uq_docentes_email') !== false) {
-                $_SESSION['mensaje'] = "Error: El email '{$email}' ya está registrado.";
-            } else {
-                $_SESSION['mensaje'] = "Error al agregar docente: Entrada duplicada no especificada.";
-            }
+        // Simplificado el manejo de errores. El original tenía comprobaciones más específicas.
+        if (method_exists($e, 'getCode') && $e->getCode() == 1062) {
+             $_SESSION['mensaje'] = "Error: Ya existe un registro con los datos proporcionados (usuario, DNI, código o email).";
         } else {
             $_SESSION['mensaje'] = "Error al agregar docente: " . $e->getMessage();
         }
         $_SESSION['mensaje_tipo'] = "danger";
     }
 
-    $conexion->close();
     header("Location: ../vistas/admin/gestionar_docentes.php");
     exit();
 }
 
-function editarDocente($conexion) {
+function editarDocente() {
+    global $conexion;
     $id_docente = $_POST['id_docente'];
     $id_user = $_POST['id_user'];
 
@@ -120,59 +100,48 @@ function editarDocente($conexion) {
         $email = $_POST['email'];
         $estado = $_POST['estado'];
 
-        $stmt_docente = $conexion->prepare(
-            "UPDATE docentes SET 
-             codigo_docente = ?, dni = ?, apellido_paterno = ?, apellido_materno = ?, nombres = ?, 
-             especialidad = ?, telefono = ?, email = ?, estado = ?
-             WHERE id = ?"
-        );
-        $stmt_docente->bind_param(
-            "sssssssssi",
+        $sql_docente = "UPDATE docentes SET 
+                        codigo_docente = ?, dni = ?, apellido_paterno = ?, apellido_materno = ?, nombres = ?, 
+                        especialidad = ?, telefono = ?, email = ?, estado = ?
+                        WHERE id = ?";
+        $params_docente = [
             $codigo_docente, $dni, $apellido_paterno, $apellido_materno, $nombres,
-            $especialidad, $telefono, $email, $estado,
-            $id_docente
-        );
-        $stmt_docente->execute();
-        $stmt_docente->close();
+            $especialidad, $telefono, $email, $estado, $id_docente
+        ];
+        if (!execute_cud($sql_docente, "sssssssssi", $params_docente)) {
+            throw new Exception("No se pudo actualizar los datos del docente.");
+        }
 
         // 2. Actualizar contraseña si se proporcionó una nueva
         $password = $_POST['password'];
         if (!empty($password)) {
             $password_hash = password_hash($password, PASSWORD_DEFAULT);
-            $stmt_user = $conexion->prepare("UPDATE users SET password_hash = ? WHERE id = ?");
-            $stmt_user->bind_param("si", $password_hash, $id_user);
-            $stmt_user->execute();
-            $stmt_user->close();
+            $sql_user = "UPDATE users SET password_hash = ? WHERE id = ?";
+            if (!execute_cud($sql_user, "si", [$password_hash, $id_user])) {
+                throw new Exception("No se pudo actualizar la contraseña.");
+            }
         }
 
         $conexion->commit();
         $_SESSION['mensaje'] = "Docente actualizado exitosamente.";
         $_SESSION['mensaje_tipo'] = "success";
 
-    } catch (mysqli_sql_exception $e) {
+    } catch (Exception $e) {
         $conexion->rollback();
-        if ($e->getCode() == 1062) {
-             if (strpos($e->getMessage(), 'uq_docentes_codigo') !== false) {
-                $_SESSION['mensaje'] = "Error: El código de docente '{$codigo_docente}' ya existe.";
-            } elseif (strpos($e->getMessage(), 'uq_docentes_dni') !== false) {
-                $_SESSION['mensaje'] = "Error: El DNI '{$dni}' ya está registrado.";
-            } elseif (strpos($e->getMessage(), 'uq_docentes_email') !== false) {
-                $_SESSION['mensaje'] = "Error: El email '{$email}' ya está registrado.";
-            } else {
-                $_SESSION['mensaje'] = "Error al actualizar docente: Entrada duplicada no especificada.";
-            }
+        if (method_exists($e, 'getCode') && $e->getCode() == 1062) {
+            $_SESSION['mensaje'] = "Error: Ya existe otro registro con los datos proporcionados (DNI, código o email).";
         } else {
             $_SESSION['mensaje'] = "Error al actualizar docente: " . $e->getMessage();
         }
         $_SESSION['mensaje_tipo'] = "danger";
     }
 
-    $conexion->close();
     header("Location: ../vistas/admin/gestionar_docentes.php");
     exit();
 }
 
-function eliminarDocente($conexion) {
+function eliminarDocente() {
+    global $conexion;
     $id_docente = $_GET['id'] ?? 0;
 
     if ($id_docente == 0) {
@@ -186,29 +155,21 @@ function eliminarDocente($conexion) {
 
     try {
         // 1. Obtener el id_user antes de eliminar el docente
-        $stmt_get_user = $conexion->prepare("SELECT id_user FROM docentes WHERE id = ?");
-        $stmt_get_user->bind_param("i", $id_docente);
-        $stmt_get_user->execute();
-        $resultado = $stmt_get_user->get_result();
-        $docente = $resultado->fetch_assoc();
-        $id_user = $docente['id_user'];
-        $stmt_get_user->close();
-
-        if (!$id_user) {
+        $docente = select_one("SELECT id_user FROM docentes WHERE id = ?", "i", [$id_docente]);
+        if (!$docente || !isset($docente['id_user'])) {
             throw new Exception("No se pudo encontrar el usuario asociado al docente.");
         }
+        $id_user = $docente['id_user'];
 
         // 2. Eliminar al docente.
-        $stmt_docente = $conexion->prepare("DELETE FROM docentes WHERE id = ?");
-        $stmt_docente->bind_param("i", $id_docente);
-        $stmt_docente->execute();
-        $stmt_docente->close();
+        if (!execute_cud("DELETE FROM docentes WHERE id = ?", "i", [$id_docente])) {
+            throw new Exception("No se pudo eliminar el registro del docente.");
+        }
 
         // 3. Eliminar el usuario asociado
-        $stmt_user = $conexion->prepare("DELETE FROM users WHERE id = ?");
-        $stmt_user->bind_param("i", $id_user);
-        $stmt_user->execute();
-        $stmt_user->close();
+        if (!execute_cud("DELETE FROM users WHERE id = ?", "i", [$id_user])) {
+            throw new Exception("No se pudo eliminar el usuario asociado.");
+        }
 
         $conexion->commit();
         $_SESSION['mensaje'] = "Docente eliminado exitosamente.";
@@ -220,87 +181,6 @@ function eliminarDocente($conexion) {
         $_SESSION['mensaje_tipo'] = "danger";
     }
 
-    $conexion->close();
-    header("Location: ../vistas/admin/gestionar_docentes.php");
-    exit();
-}
-
-function agregarDocente($conexion) {
-    // Iniciar transacción
-    $conexion->begin_transaction();
-
-    try {
-        // 1. Crear el usuario
-        $username = $_POST['username'];
-        $password = $_POST['password'];
-        $password_hash = password_hash($password, PASSWORD_DEFAULT);
-        $rol = 'docente';
-
-        $stmt_user = $conexion->prepare("INSERT INTO users (username, password_hash, rol) VALUES (?, ?, ?)");
-        $stmt_user->bind_param("sss", $username, $password_hash, $rol);
-        $stmt_user->execute();
-        $id_user = $conexion->insert_id;
-        $stmt_user->close();
-
-        // 2. Crear el docente
-        $codigo_docente = $_POST['codigo_docente'];
-        $dni = $_POST['dni'];
-        $apellido_paterno = $_POST['apellido_paterno'];
-        $apellido_materno = $_POST['apellido_materno'];
-        $nombres = $_POST['nombres'];
-        $especialidad = $_POST['especialidad'];
-        $telefono = $_POST['telefono'];
-        $email = $_POST['email'];
-
-        $stmt_docente = $conexion->prepare(
-            "INSERT INTO docentes (codigo_docente, dni, apellido_paterno, apellido_materno, nombres, especialidad, telefono, email, id_user) 
-             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)"
-        );
-        $stmt_docente->bind_param(
-            "ssssssssi",
-            $codigo_docente,
-            $dni,
-            $apellido_paterno,
-            $apellido_materno,
-            $nombres,
-            $especialidad,
-            $telefono,
-            $email,
-            $id_user
-        );
-        $stmt_docente->execute();
-        $stmt_docente->close();
-
-        // Si todo fue bien, confirmar la transacción
-        $conexion->commit();
-        
-        $_SESSION['mensaje'] = "Docente agregado exitosamente.";
-        $_SESSION['mensaje_tipo'] = "success";
-
-    } catch (mysqli_sql_exception $e) {
-        // Si algo falla, revertir la transacción
-        $conexion->rollback();
-
-        // Manejar errores de duplicados
-        if ($e->getCode() == 1062) { // Código de error para entrada duplicada
-            if (strpos($e->getMessage(), 'uq_users_username') !== false) {
-                $_SESSION['mensaje'] = "Error: El nombre de usuario '{$username}' ya existe.";
-            } elseif (strpos($e->getMessage(), 'uq_docentes_codigo') !== false) {
-                $_SESSION['mensaje'] = "Error: El código de docente '{$codigo_docente}' ya existe.";
-            } elseif (strpos($e->getMessage(), 'uq_docentes_dni') !== false) {
-                $_SESSION['mensaje'] = "Error: El DNI '{$dni}' ya está registrado.";
-            } elseif (strpos($e->getMessage(), 'uq_docentes_email') !== false) {
-                $_SESSION['mensaje'] = "Error: El email '{$email}' ya está registrado.";
-            } else {
-                $_SESSION['mensaje'] = "Error al agregar docente: Entrada duplicada no especificada.";
-            }
-        } else {
-            $_SESSION['mensaje'] = "Error al agregar docente: " . $e->getMessage();
-        }
-        $_SESSION['mensaje_tipo'] = "danger";
-    }
-
-    $conexion->close();
     header("Location: ../vistas/admin/gestionar_docentes.php");
     exit();
 }

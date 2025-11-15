@@ -5,8 +5,8 @@
 <p>Desde aquí podrás consultar tus calificaciones, horario, asistencia y pagos.</p>
 
 <div class="row">
-    <div class="col-md-4">
-        <div class="card text-white bg-primary mb-3">
+    <div class="col-md-4 mb-4">
+        <div class="card card-calificaciones mb-3">
             <div class="card-header">Calificaciones</div>
             <div class="card-body">
                 <h5 class="card-title">Mis Calificaciones</h5>
@@ -15,8 +15,8 @@
             </div>
         </div>
     </div>
-    <div class="col-md-4">
-        <div class="card text-white bg-success mb-3">
+    <div class="col-md-4 mb-4">
+        <div class="card card-horario mb-3">
             <div class="card-header">Horario</div>
             <div class="card-body">
                 <h5 class="card-title">Mi Horario</h5>
@@ -25,8 +25,8 @@
             </div>
         </div>
     </div>
-    <div class="col-md-4">
-        <div class="card text-white bg-info mb-3">
+    <div class="col-md-4 mb-4">
+        <div class="card card-asistencia mb-3">
             <div class="card-header">Asistencia</div>
             <div class="card-body">
                 <h5 class="card-title">Mi Asistencia</h5>
@@ -35,8 +35,8 @@
             </div>
         </div>
     </div>
-    <div class="col-md-4">
-        <div class="card text-white bg-warning mb-3">
+    <div class="col-md-4 mb-4">
+        <div class="card card-pagos mb-3">
             <div class="card-header">Pagos</div>
             <div class="card-body">
                 <h5 class="card-title">Mis Pagos</h5>
