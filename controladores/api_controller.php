@@ -25,20 +25,6 @@ switch ($accion) {
         obtenerTendenciaMatriculas();
         break;
 
-    // --- Acciones de Docente ---
-    case 'get_teacher_kpis':
-        if ($_SESSION['rol'] !== 'docente') die(json_encode(['error' => 'Acceso denegado']));
-        obtenerKpisDocente();
-        break;
-    case 'get_teacher_grade_distribution':
-        if ($_SESSION['rol'] !== 'docente') die(json_encode(['error' => 'Acceso denegado']));
-        obtenerDistribucionCalificacionesDocente();
-        break;
-    case 'get_teacher_attendance_summary':
-        if ($_SESSION['rol'] !== 'docente') die(json_encode(['error' => 'Acceso denegado']));
-        obtenerResumenAsistenciaDocente();
-        break;
-
     // --- Acciones de Estudiante ---
     case 'get_student_kpis':
         if ($_SESSION['rol'] !== 'estudiante') die(json_encode(['error' => 'Acceso denegado']));
@@ -51,6 +37,20 @@ switch ($accion) {
     case 'get_student_attendance_summary':
         if ($_SESSION['rol'] !== 'estudiante') die(json_encode(['error' => 'Acceso denegado']));
         obtenerResumenAsistenciaEstudiante();
+        break;
+
+    // --- Acciones de Pagos (Admin) ---
+    case 'get_payment_kpis':
+        if ($_SESSION['rol'] !== 'admin') die(json_encode(['error' => 'Acceso denegado']));
+        obtenerKpisPagos();
+        break;
+    case 'get_income_by_month':
+        if ($_SESSION['rol'] !== 'admin') die(json_encode(['error' => 'Acceso denegado']));
+        obtenerIngresosPorMes();
+        break;
+    case 'get_pension_status_summary':
+        if ($_SESSION['rol'] !== 'admin') die(json_encode(['error' => 'Acceso denegado']));
+        obtenerResumenEstadoPensiones();
         break;
 
     default:
@@ -388,6 +388,84 @@ function obtenerResumenAsistenciaEstudiante() {
     } catch (Exception $e) {
         http_response_code(500);
         echo json_encode(['error' => 'Error al obtener resumen de asistencia: ' . $e->getMessage()]);
+    }
+}
+
+// --- Funciones de Pagos (Admin) ---
+
+function obtenerKpisPagos() {
+    try {
+        $sql_ingresos = "SELECT SUM(monto_pagado) as total FROM pagos";
+        $ingresos_totales = select_one($sql_ingresos)['total'] ?? 0;
+
+        $sql_adeudado = "SELECT SUM(monto) as total FROM pensiones";
+        $total_adeudado = select_one($sql_adeudado)['total'] ?? 0;
+        
+        $saldo_pendiente = $total_adeudado - $ingresos_totales;
+        $tasa_cobranza = ($total_adeudado > 0) ? round(($ingresos_totales / $total_adeudado) * 100) : 0;
+
+        echo json_encode([
+            'ingresos_totales' => $ingresos_totales,
+            'saldo_pendiente' => $saldo_pendiente,
+            'tasa_cobranza' => $tasa_cobranza
+        ]);
+    } catch (Exception $e) {
+        http_response_code(500);
+        echo json_encode(['error' => 'Error al obtener los KPIs de pagos: ' . $e->getMessage()]);
+    }
+}
+
+function obtenerIngresosPorMes() {
+    try {
+        $sql = "
+            SELECT YEAR(fecha_pago) as anio, MONTH(fecha_pago) as mes, SUM(monto_pagado) as total
+            FROM pagos GROUP BY anio, mes ORDER BY anio, mes;
+        ";
+        $resultado = select_all($sql);
+        $labels = []; $data = [];
+        $meses = ["Ene", "Feb", "Mar", "Abr", "May", "Jun", "Jul", "Ago", "Sep", "Oct", "Nov", "Dic"];
+        foreach ($resultado as $fila) {
+            $labels[] = $meses[$fila['mes'] - 1] . ' ' . $fila['anio'];
+            $data[] = (float)$fila['total'];
+        }
+        echo json_encode(['labels' => $labels, 'data' => $data]);
+    } catch (Exception $e) {
+        http_response_code(500);
+        echo json_encode(['error' => 'Error al obtener ingresos por mes: ' . $e->getMessage()]);
+    }
+}
+
+function obtenerResumenEstadoPensiones() {
+    try {
+        $sql = "
+            SELECT 
+                p.id, p.monto, p.fecha_vencimiento,
+                COALESCE(SUM(pa.monto_pagado), 0) as total_pagado
+            FROM pensiones p
+            LEFT JOIN pagos pa ON p.id = pa.id_pension
+            GROUP BY p.id;
+        ";
+        $resultado = select_all($sql);
+        
+        $estados = ['Pagado' => 0, 'Pendiente' => 0, 'Vencido' => 0];
+        foreach($resultado as $pension) {
+            $saldo = $pension['monto'] - $pension['total_pagado'];
+            if ($saldo <= 0) {
+                $estados['Pagado']++;
+            } elseif (strtotime($pension['fecha_vencimiento']) < time()) {
+                $estados['Vencido']++;
+            } else {
+                $estados['Pendiente']++;
+            }
+        }
+
+        echo json_encode([
+            'labels' => array_keys($estados),
+            'data' => array_values($estados)
+        ]);
+    } catch (Exception $e) {
+        http_response_code(500);
+        echo json_encode(['error' => 'Error al obtener estado de pensiones: ' . $e->getMessage()]);
     }
 }
 ?>

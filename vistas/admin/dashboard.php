@@ -52,7 +52,7 @@
 </div>
 
 <!-- Fila de Gráficos Superiores -->
-<div class="row">
+<div class="row mb-4">
     <!-- Gráfico de Dona Mejorado -->
     <div class="col-xl-5 col-lg-6">
         <div class="card shadow mb-4">
