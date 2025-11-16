@@ -54,6 +54,9 @@ if (isset($_SESSION['rol'])) {
             <a href="gestionar_recursos.php" class="list-group-item list-group-item-action <?php echo isActive('gestionar_recursos.php', $current_page); ?>">
                 <i class="fas fa-folder-open me-2"></i>Recursos del Curso
             </a>
+            <a href="gestionar_tareas.php" class="list-group-item list-group-item-action <?php echo isActive('gestionar_tareas.php', $current_page); ?>">
+                <i class="fas fa-tasks me-2"></i>Gestionar Tareas
+            </a>
             <a href="gestionar_notas.php" class="list-group-item list-group-item-action <?php echo isActive('gestionar_notas.php', $current_page); ?>">
                 <i class="fas fa-graduation-cap me-2"></i>Gestionar Notas
             </a>
@@ -72,6 +75,9 @@ if (isset($_SESSION['rol'])) {
             </a>
             <a href="mi_horario.php" class="list-group-item list-group-item-action <?php echo isActive('mi_horario.php', $current_page); ?>">
                 <i class="fas fa-calendar-alt me-2"></i>Mi Horario
+            </a>
+            <a href="mis_tareas.php" class="list-group-item list-group-item-action <?php echo isActive('mis_tareas.php', $current_page); ?>">
+                <i class="fas fa-tasks me-2"></i>Mis Tareas
             </a>
             <a href="mi_asistencia.php" class="list-group-item list-group-item-action <?php echo isActive('mi_asistencia.php', $current_page); ?>">
                 <i class="fas fa-clipboard-check me-2"></i>Mi Asistencia
