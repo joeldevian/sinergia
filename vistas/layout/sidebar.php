@@ -37,6 +37,9 @@ if (isset($_SESSION['rol'])) {
             <a href="gestionar_asignaciones.php" class="list-group-item list-group-item-action <?php echo isActive('gestionar_asignaciones.php', $current_page); ?>">
                 <i class="fas fa-link me-2"></i>Asignaciones
             </a>
+            <a href="gestionar_pagos.php" class="list-group-item list-group-item-action <?php echo isActive('gestionar_pagos.php', $current_page); ?>">
+                <i class="fas fa-money-bill-wave me-2"></i>Gestión de Pagos
+            </a>
             <?php
             break;
         case 'docente':
