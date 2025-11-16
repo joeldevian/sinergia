@@ -6,12 +6,12 @@ require_once '../../config/conexion.php';
 $id_user_estudiante = $_SESSION['user_id'];
 
 // Fetch the student's full details from the estudiantes table
-$stmt = $conexion->prepare("SELECT * FROM estudiantes WHERE id_user = ?");
-$stmt->bind_param("i", $id_user_estudiante);
-$stmt->execute();
-$resultado = $stmt->get_result();
-$estudiante = $resultado->fetch_assoc();
-$stmt->close();
+$stmt_estudiante = $conexion->prepare("SELECT * FROM estudiantes WHERE id_user = ?");
+$stmt_estudiante->bind_param("i", $id_user_estudiante);
+$stmt_estudiante->execute();
+$resultado_estudiante = $stmt_estudiante->get_result();
+$estudiante = $resultado_estudiante->fetch_assoc();
+$stmt_estudiante->close();
 
 if (!$estudiante) {
     // This should not happen if the user is logged in correctly
@@ -19,6 +19,18 @@ if (!$estudiante) {
     require_once 'layout/footer.php';
     exit();
 }
+
+// Fetch current user data from 'users' table for username and email
+$stmt_user = $conexion->prepare("SELECT username, email FROM users WHERE id = ?");
+$stmt_user->bind_param("i", $id_user_estudiante);
+$stmt_user->execute();
+$resultado_user = $stmt_user->get_result();
+$user_data = $resultado_user->fetch_assoc();
+$stmt_user->close();
+
+// Ensure email is not null for display, though it might be in DB
+$user_email = $user_data['email'] ?? '';
+
 ?>
 
 <h1 class="mb-4">Mi Perfil</h1>
@@ -48,7 +60,7 @@ if (isset($_SESSION['mensaje_perfil'])) {
                     <li class="list-group-item"><strong>Apellidos:</strong> <?php echo htmlspecialchars($estudiante['apellido_paterno'] . ' ' . $estudiante['apellido_materno']); ?></li>
                     <li class="list-group-item"><strong>Código:</strong> <?php echo htmlspecialchars($estudiante['codigo_estudiante']); ?></li>
                     <li class="list-group-item"><strong>DNI:</strong> <?php echo htmlspecialchars($estudiante['dni']); ?></li>
-                    <li class="list-group-item"><strong>Email:</strong> <?php echo htmlspecialchars($estudiante['email']); ?></li>
+                    <li class="list-group-item"><strong>Email (Estudiante):</strong> <?php echo htmlspecialchars($estudiante['email']); ?></li>
                     <li class="list-group-item"><strong>Teléfono:</strong> <?php echo htmlspecialchars($estudiante['telefono'] ?? 'No registrado'); ?></li>
                     <li class="list-group-item"><strong>Dirección:</strong> <?php echo htmlspecialchars($estudiante['direccion'] ?? 'No registrada'); ?></li>
                     <li class="list-group-item"><strong>Fecha de Nacimiento:</strong> <?php echo htmlspecialchars($estudiante['fecha_nacimiento'] ?? 'No registrada'); ?></li>
@@ -57,6 +69,31 @@ if (isset($_SESSION['mensaje_perfil'])) {
         </div>
     </div>
 
+    <!-- Edit User Info Card -->
+    <div class="col-lg-6 mb-4">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="fas fa-user-edit me-2"></i>Editar Información de Usuario</h5>
+            </div>
+            <div class="card-body">
+                <form action="../../controladores/perfil_controller.php" method="POST">
+                    <input type="hidden" name="accion" value="actualizar_perfil">
+                    <div class="mb-3">
+                        <label for="username" class="form-label">Nombre de Usuario</label>
+                        <input type="text" class="form-control" id="username" name="username" value="<?php echo htmlspecialchars($user_data['username']); ?>" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="email" class="form-label">Correo Electrónico (Usuario)</label>
+                        <input type="email" class="form-control" id="email" name="email" value="<?php echo htmlspecialchars($user_email); ?>">
+                    </div>
+                    <button type="submit" class="btn btn-primary">Actualizar Información</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row justify-content-center">
     <!-- Change Password Card -->
     <div class="col-lg-6 mb-4">
         <div class="card">

@@ -11,8 +11,9 @@ $accion = $_POST['accion'] ?? '';
 
 if ($accion == 'cambiar_password') {
     cambiarPassword();
+} elseif ($accion == 'actualizar_perfil') {
+    actualizarPerfil();
 } else {
-    // Redirect if the action is not recognized
     // Determine redirect based on user role if possible, otherwise default to student dashboard
     $redirect_url = '../vistas/estudiante/dashboard.php'; // Default
     if (isset($_SESSION['rol'])) {
@@ -43,10 +44,10 @@ function cambiarPassword() {
     if (isset($_SESSION['rol'])) {
         switch ($_SESSION['rol']) {
             case 'admin':
-                $redirect_page = '../vistas/admin/dashboard.php'; // Admin doesn't have mi_perfil.php
+                $redirect_page = '../vistas/admin/mi_perfil.php'; // Admin now has mi_perfil.php
                 break;
             case 'docente':
-                $redirect_page = '../vistas/docente/dashboard.php'; // Docente doesn't have mi_perfil.php
+                $redirect_page = '../vistas/docente/mi_perfil.php'; // Docente now has mi_perfil.php
                 break;
             case 'estudiante':
                 $redirect_page = '../vistas/estudiante/mi_perfil.php';
@@ -89,6 +90,77 @@ function cambiarPassword() {
         $_SESSION['mensaje_perfil_tipo'] = "success";
     } else {
         $_SESSION['mensaje_perfil'] = "Error al actualizar la contraseña. Inténtalo de nuevo.";
+        $_SESSION['mensaje_perfil_tipo'] = "danger";
+    }
+
+    header("Location: " . $redirect_page);
+    exit();
+}
+
+function actualizarPerfil() {
+    $id_user = $_SESSION['user_id'];
+    $username = $_POST['username'] ?? '';
+    $email = $_POST['email'] ?? '';
+
+    // Determine redirect URL based on user role
+    $redirect_page = '../vistas/estudiante/mi_perfil.php'; // Default
+    if (isset($_SESSION['rol'])) {
+        switch ($_SESSION['rol']) {
+            case 'admin':
+                $redirect_page = '../vistas/admin/mi_perfil.php';
+                break;
+            case 'docente':
+                $redirect_page = '../vistas/docente/mi_perfil.php';
+                break;
+            case 'estudiante':
+                $redirect_page = '../vistas/estudiante/mi_perfil.php';
+                break;
+        }
+    }
+
+    // Basic validations
+    if (empty($username)) {
+        $_SESSION['mensaje_perfil'] = "El nombre de usuario no puede estar vacío.";
+        $_SESSION['mensaje_perfil_tipo'] = "danger";
+        header("Location: " . $redirect_page);
+        exit();
+    }
+    if (!filter_var($email, FILTER_VALIDATE_EMAIL) && !empty($email)) {
+        $_SESSION['mensaje_perfil'] = "El formato del correo electrónico no es válido.";
+        $_SESSION['mensaje_perfil_tipo'] = "danger";
+        header("Location: " . $redirect_page);
+        exit();
+    }
+
+    // Check if username is already taken by another user
+    $existing_user_by_username = select_one("SELECT id FROM users WHERE username = ? AND id != ?", "si", [$username, $id_user]);
+    if ($existing_user_by_username) {
+        $_SESSION['mensaje_perfil'] = "El nombre de usuario ya está en uso.";
+        $_SESSION['mensaje_perfil_tipo'] = "danger";
+        header("Location: " . $redirect_page);
+        exit();
+    }
+
+    // Check if email is already taken by another user (if email is provided)
+    if (!empty($email)) {
+        $existing_user_by_email = select_one("SELECT id FROM users WHERE email = ? AND id != ?", "si", [$email, $id_user]);
+        if ($existing_user_by_email) {
+            $_SESSION['mensaje_perfil'] = "El correo electrónico ya está en uso.";
+            $_SESSION['mensaje_perfil_tipo'] = "danger";
+            header("Location: " . $redirect_page);
+            exit();
+        }
+    }
+
+    // Update user data
+    $sql = "UPDATE users SET username = ?, email = ? WHERE id = ?";
+    if (execute_cud($sql, "ssi", [$username, $email, $id_user])) {
+        $_SESSION['mensaje_perfil'] = "Información de perfil actualizada exitosamente.";
+        $_SESSION['mensaje_perfil_tipo'] = "success";
+        // Update session username if it changed
+        $_SESSION['username'] = $username;
+    } else {
+        $_SESSION['mensaje_perfil'] = "Error al actualizar la información del perfil. Inténtalo de nuevo.";
         $_SESSION['mensaje_perfil_tipo'] = "danger";
     }
 
