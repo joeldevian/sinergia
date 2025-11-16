@@ -39,6 +39,20 @@ switch ($accion) {
         obtenerResumenAsistenciaEstudiante();
         break;
 
+    // --- Acciones de Docente ---
+    case 'get_teacher_kpis':
+        if ($_SESSION['rol'] !== 'docente') die(json_encode(['error' => 'Acceso denegado']));
+        obtenerKpisDocente();
+        break;
+    case 'get_teacher_grade_distribution':
+        if ($_SESSION['rol'] !== 'docente') die(json_encode(['error' => 'Acceso denegado']));
+        obtenerDistribucionCalificacionesDocente();
+        break;
+    case 'get_teacher_attendance_summary':
+        if ($_SESSION['rol'] !== 'docente') die(json_encode(['error' => 'Acceso denegado']));
+        obtenerResumenAsistenciaDocente();
+        break;
+
     // --- Acciones de Pagos (Admin) ---
     case 'get_payment_kpis':
         if ($_SESSION['rol'] !== 'admin') die(json_encode(['error' => 'Acceso denegado']));

@@ -10,6 +10,7 @@ function isActive($pageName, $currentPage) {
 }
 
 if (isset($_SESSION['rol'])) {
+    echo "<!-- ROL: " . $_SESSION['rol'] . " -->";
     switch ($_SESSION['rol']) {
         case 'admin':
             ?>
@@ -49,6 +50,9 @@ if (isset($_SESSION['rol'])) {
             </a>
             <a href="mis_cursos.php" class="list-group-item list-group-item-action <?php echo isActive('mis_cursos.php', $current_page); ?>">
                 <i class="fas fa-book me-2"></i>Mis Cursos
+            </a>
+            <a href="gestionar_recursos.php" class="list-group-item list-group-item-action <?php echo isActive('gestionar_recursos.php', $current_page); ?>">
+                <i class="fas fa-folder-open me-2"></i>Recursos del Curso
             </a>
             <a href="gestionar_notas.php" class="list-group-item list-group-item-action <?php echo isActive('gestionar_notas.php', $current_page); ?>">
                 <i class="fas fa-graduation-cap me-2"></i>Gestionar Notas

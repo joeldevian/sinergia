@@ -16,6 +16,11 @@ $estudiante_data = $resultado_estudiante_id->fetch_assoc();
 $id_estudiante = $estudiante_data['id'] ?? 0;
 $stmt_estudiante_id->close();
 
+// --- INICIO DE CÓDIGO DE DEPURACIÓN ---
+echo "<!-- DEBUG: id_user_estudiante = " . $id_user_estudiante . " -->";
+echo "<!-- DEBUG: id_estudiante = " . $id_estudiante . " -->";
+// --- FIN DE CÓDIGO DE DEPURACIÓN ---
+
 $horario_cursos = [];
 if ($id_estudiante > 0) {
     // Fetch courses the student is enrolled in, including the course ID
@@ -25,10 +30,12 @@ if ($id_estudiante > 0) {
                         c.codigo_curso,
                         c.horas_semanales,
                         ca.nombre_carrera,
-                        m.periodo_academico
+                        m.periodo_academico,
+                        a.id AS id_asignacion -- Get the assignment ID
                       FROM matriculas m
                       JOIN cursos c ON m.id_curso = c.id
                       JOIN carreras ca ON c.id_carrera = ca.id
+                      LEFT JOIN docente_curso a ON m.id_curso = a.id_curso AND m.periodo_academico = a.periodo_academico
                       WHERE m.id_estudiante = ? AND m.estado = 'matriculado'
                       ORDER BY c.nombre_curso ASC";
     $stmt_horario = $conexion->prepare($query_horario);
@@ -41,6 +48,12 @@ if ($id_estudiante > 0) {
     }
     $stmt_horario->close();
 }
+
+// --- INICIO DE CÓDIGO DE DEPURACIÓN ---
+echo "<!-- DEBUG: Contenido de horario_cursos: -->";
+echo "<!-- " . print_r($horario_cursos, true) . " -->";
+// --- FIN DE CÓDIGO DE DEPURACIÓN ---
+
 ?>
 
 <h1 class="mb-4">Mi Horario</h1>
@@ -73,6 +86,7 @@ if (isset($_SESSION['mensaje'])) {
                             <th>Carrera</th>
                             <th>Periodo Académico</th>
                             <th>Horas Semanales</th>
+                            <th>Acciones</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -80,13 +94,26 @@ if (isset($_SESSION['mensaje'])) {
                             <tr>
                                 <td><?php echo htmlspecialchars($curso['codigo_curso']); ?></td>
                                 <td>
-                                    <a href="detalle_curso.php?id_curso=<?php echo $curso['id']; ?>">
+                                    <?php if (isset($curso['id_asignacion']) && $curso['id_asignacion']): ?>
+                                        <a href="detalle_curso.php?id_asignacion=<?php echo $curso['id_asignacion']; ?>">
+                                            <?php echo htmlspecialchars($curso['nombre_curso']); ?>
+                                        </a>
+                                    <?php else: ?>
                                         <?php echo htmlspecialchars($curso['nombre_curso']); ?>
-                                    </a>
+                                    <?php endif; ?>
                                 </td>
                                 <td><?php echo htmlspecialchars($curso['nombre_carrera']); ?></td>
                                 <td><?php echo htmlspecialchars($curso['periodo_academico']); ?></td>
                                 <td><?php echo htmlspecialchars($curso['horas_semanales']); ?></td>
+                                <td>
+                                    <?php if (isset($curso['id_asignacion']) && $curso['id_asignacion']): ?>
+                                        <a href="detalle_curso.php?id_asignacion=<?php echo $curso['id_asignacion']; ?>" class="btn btn-sm btn-info" title="Ver Detalles">
+                                            <i class="fas fa-eye"></i>
+                                        </a>
+                                    <?php else: ?>
+                                        <span class="text-muted">N/A</span>
+                                    <?php endif; ?>
+                                </td>
                             </tr>
                         <?php endforeach; ?>
                     </tbody>

@@ -1,0 +1,89 @@
+<?php
+$includeDataTablesCss = true;
+$includeDataTablesJs = true;
+require_once 'layout/header.php';
+require_once '../../config/conexion.php';
+
+// Get the logged-in teacher's user ID
+$id_user_docente = $_SESSION['user_id'];
+
+// Fetch the teacher's ID from the docentes table
+$stmt_docente_id = $conexion->prepare("SELECT id FROM docentes WHERE id_user = ?");
+$stmt_docente_id->bind_param("i", $id_user_docente);
+$stmt_docente_id->execute();
+$resultado_docente_id = $stmt_docente_id->get_result();
+$docente_data = $resultado_docente_id->fetch_assoc();
+$id_docente = $docente_data['id'] ?? 0;
+$stmt_docente_id->close();
+
+$cursos_asignados = [];
+if ($id_docente > 0) {
+    // Fetch courses assigned to this teacher, including the assignment ID
+    $query_cursos = "SELECT
+                        dc.id AS id_asignacion,
+                        c.codigo_curso,
+                        c.nombre_curso,
+                        dc.periodo_academico
+                     FROM docente_curso dc
+                     JOIN cursos c ON dc.id_curso = c.id
+                     WHERE dc.id_docente = ?
+                     ORDER BY dc.periodo_academico DESC, c.nombre_curso ASC";
+    $stmt_cursos = $conexion->prepare($query_cursos);
+    $stmt_cursos->bind_param("i", $id_docente);
+    $stmt_cursos->execute();
+    $resultado_cursos = $stmt_cursos->get_result();
+    if ($resultado_cursos) {
+        while ($curso = $resultado_cursos->fetch_assoc()) {
+            $cursos_asignados[] = $curso;
+        }
+    }
+}
+?>
+
+<h1 class="mb-4">Gestionar Recursos del Curso</h1>
+<p>Selecciona un curso para subir materiales, compartir enlaces o enviar comunicados a tus estudiantes.</p>
+
+<div class="card">
+    <div class="card-header">
+        <h5 class="mb-0">Mis Cursos Asignados</h5>
+    </div>
+    <div class="card-body">
+        <div class="table-responsive">
+            <table class="table table-striped table-bordered table-hover datatable">
+                <thead class="table-dark">
+                    <tr>
+                        <th>Periodo</th>
+                        <th>Código</th>
+                        <th>Nombre del Curso</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <?php if (!empty($cursos_asignados)): ?>
+                        <?php foreach($cursos_asignados as $curso): ?>
+                            <tr>
+                                <td><?php echo htmlspecialchars($curso['periodo_academico']); ?></td>
+                                <td><?php echo htmlspecialchars($curso['codigo_curso']); ?></td>
+                                <td><?php echo htmlspecialchars($curso['nombre_curso']); ?></td>
+                                <td>
+                                    <a href="gestionar_recursos_curso.php?id_asignacion=<?php echo $curso['id_asignacion']; ?>" class="btn btn-sm btn-primary" title="Gestionar Recursos">
+                                        <i class="fas fa-folder-open"></i> Gestionar Recursos
+                                    </a>
+                                </td>
+                            </tr>
+                        <?php endforeach; ?>
+                    <?php else: ?>
+                        <tr>
+                            <td colspan="4" class="text-center">No tienes cursos asignados.</td>
+                        </tr>
+                    <?php endif; ?>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<?php
+$conexion->close();
+require_once 'layout/footer.php';
+?>

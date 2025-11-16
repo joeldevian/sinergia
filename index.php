@@ -30,15 +30,22 @@ if (isset($_SESSION['login_error'])) {
     <title>Login - INSTITUTO SINERGIA</title>
     <!-- Bootstrap CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome CSS -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <!-- Custom CSS -->
     <link rel="stylesheet" href="assets/css/estilos.css">
+    <style>
+        #togglePassword {
+            cursor: pointer;
+        }
+    </style>
 </head>
 <body class="d-flex align-items-center justify-content-center min-vh-100 bg-light">
     <div class="container">
         <div class="row justify-content-center">
             <div class="col-md-6 col-lg-4">
                 <div class="card shadow-lg">
-                    <div class="card-header text-center bg-primary text-white">
+                    <div class="card-header text-center bg-danger text-white">
                         <h3 class="mb-0">INSTITUTO SINERGIA</h3>
                         <p class="mb-0">Sistema de Gestión Académica</p>
                     </div>
@@ -56,10 +63,15 @@ if (isset($_SESSION['login_error'])) {
                             </div>
                             <div class="mb-4">
                                 <label for="password" class="form-label">Contraseña</label>
-                                <input type="password" class="form-control" id="password" name="password" required>
+                                <div class="input-group">
+                                    <input type="password" class="form-control" id="password" name="password" required>
+                                    <span class="input-group-text" id="togglePassword">
+                                        <i class="fas fa-eye" id="eyeIcon"></i>
+                                    </span>
+                                </div>
                             </div>
                             <div class="d-grid">
-                                <button type="submit" class="btn btn-primary btn-lg">Entrar</button>
+                                <button type="submit" class="btn btn-danger btn-lg">Entrar</button>
                             </div>
                         </form>
                     </div>
@@ -73,5 +85,20 @@ if (isset($_SESSION['login_error'])) {
 
     <!-- Bootstrap JS Bundle with Popper -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const togglePassword = document.querySelector('#togglePassword');
+            const password = document.querySelector('#password');
+            const eyeIcon = document.querySelector('#eyeIcon');
+
+            togglePassword.addEventListener('click', function (e) {
+                // toggle the type attribute
+                const type = password.getAttribute('type') === 'password' ? 'text' : 'password';
+                password.setAttribute('type', type);
+                // toggle the eye slash icon
+                eyeIcon.classList.toggle('fa-eye-slash');
+            });
+        });
+    </script>
 </body>
 </html>

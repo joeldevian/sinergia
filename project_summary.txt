@@ -68,9 +68,6 @@ Desarrollar un Sistema Web de Gestión Académica para INSTITUTO SINERGIA utiliz
 *   Personalización de colores para las tarjetas de los dashboards de Administrador, Docente y Estudiante, con texto oscuro para mejorar la legibilidad.
 *   Estandarización de la altura y alineación de las tarjetas en todos los dashboards para una apariencia uniforme.
 *   Corrección de la visualización de los controles de paginación de DataTables para eliminar bordes duplicados y ajustar espaciados.
-*   Implementación del **resaltado automático del enlace activo** en la barra lateral para mejorar la navegación.
-
-**Funcionalidad y Estabilidad:**
 *   Activación de la **paginación y búsqueda de DataTables** en todas las tablas de las secciones de Docente y Estudiante.
 *   Corrección de un conflicto de JavaScript al cargar DataTables, asegurando que jQuery se cargue correctamente.
 
@@ -89,5 +86,51 @@ Desarrollar un Sistema Web de Gestión Académica para INSTITUTO SINERGIA utiliz
 **Estado Actual del Proyecto:**
 El sistema es ahora mucho más robusto, seguro, mantenible y ofrece una experiencia de usuario mejorada. Todas las funcionalidades existentes han sido revisadas y optimizadas.
 
+---
+--- Avance del Día (15 de noviembre de 2025) ---
+
+**Mejoras en Seguridad:**
+*   Corregida la vulnerabilidad de fijación de sesión en `controladores/login_controller.php` mediante `session_regenerate_id(true);`.
+
+**Desarrollo de Dashboards Profesionales:**
+*   **Dashboard de Administración (`vistas/admin/dashboard.php`):**
+    *   Implementado un dashboard integral con KPIs (Estudiantes, Docentes, Cursos Activos).
+    *   Gráfico de Dona "Distribución de Estudiantes por Curso (Top 5)" mejorado con total en el centro.
+    *   Gráfico de Barras "Distribución General de Calificaciones" (Desaprobado, Aprobado, Bueno, Excelente).
+    *   Gráfico de Líneas "Tendencia de Nuevas Matrículas por Mes".
+    *   Ajustado el espaciado entre los gráficos para una mejor visualización.
+*   **Dashboard de Docente (`vistas/docente/dashboard.php`):**
+    *   Implementado un dashboard específico para docentes con KPIs (Mis Cursos, Mis Estudiantes, Promedio de Asistencia).
+    *   Gráfico de Barras "Distribución de Calificaciones en Mis Cursos".
+    *   Gráfico de Dona "Resumen de Asistencia en Mis Cursos".
+    *   Corregida la lógica del API para vincular correctamente el `user_id` de la sesión con el `id` del perfil del docente.
+*   **Dashboard de Estudiante (`vistas/estudiante/dashboard.php`):**
+    *   Implementado un dashboard específico para estudiantes con KPIs (Cursos Matriculados, Promedio General, Mi Asistencia).
+    *   Gráfico de Barras "Mis Calificaciones por Curso".
+    *   Gráfico de Dona "Resumen de Mi Asistencia".
+    *   Corregida la lógica del API para vincular correctamente el `user_id` de la sesión con el `id` del perfil del estudiante.
+
+**Módulo de Gestión de Pagos (Administrador):**
+*   Añadido el enlace "Gestión de Pagos" en la barra lateral del administrador (`vistas/layout/sidebar.php`).
+*   Creada la página principal `vistas/admin/gestionar_pagos.php` con un resumen de pagos por estudiante.
+*   Creada la página de detalle `vistas/admin/detalle_pagos_estudiante.php` para gestionar pensiones y pagos de un estudiante específico.
+*   Implementados formularios en la página de detalle para "Asignar Nueva Pensión" y "Registrar un Pago".
+*   Creado el controlador `controladores/pago_controller.php` para procesar las acciones de pagos.
+*   **Análisis de Datos en Gestión de Pagos:**
+    *   Añadidos KPIs financieros (Ingresos Totales, Saldo Pendiente Total, Tasa de Cobranza).
+    *   Gráfico de Barras "Ingresos por Mes".
+    *   Gráfico de Dona "Estado General de Pensiones".
+    *   Ajustado el espaciado entre los gráficos y la tabla para una mejor visualización.
+
+**Mejoras en la Página de Login (`index.php`):**
+*   Cambio del esquema de color de azul a rojo para el encabezado y el botón de login.
+*   Añadida la funcionalidad de mostrar/ocultar contraseña con un icono de ojo.
+
+**Actualizaciones del Controlador API (`controladores/api_controller.php`):**
+*   Expandido con numerosos nuevos endpoints para todas las funcionalidades de dashboards y análisis, incluyendo control de acceso basado en roles y resolución de IDs para docentes/estudiantes.
+
 **Próximos Pasos (Pendiente):**
-*   Continuar implementando la validación de formularios en tiempo real para el resto de formularios del sistema.
+*   Implementar la funcionalidad de "Olvidé mi contraseña" para la página de login.
+*   Implementar el módulo de "Gestión de Recursos del Curso".
+*   Implementar el sistema de notificaciones.
+*   Implementar el calendario académico.
