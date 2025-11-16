@@ -1,13 +1,13 @@
 <?php
 require_once 'layout/header.php';
-require_once '../../config/conexion.php';
+require_once '../../config/database.php'; // Cambiado de conexion.php a database.php
 
 // Fetch courses from the database
 $query = "SELECT c.id, c.codigo_curso, c.nombre_curso, c.creditos, c.horas_semanales, ca.nombre_carrera, c.ciclo, c.tipo, c.estado 
           FROM cursos c
           JOIN carreras ca ON c.id_carrera = ca.id
           ORDER BY ca.nombre_carrera, c.nombre_curso ASC";
-$resultado = $conexion->query($query);
+$cursos = select_all($query); // Usando select_all() de database.php
 ?>
 
 <h1 class="mb-4">Gestionar Cursos</h1>
@@ -52,8 +52,8 @@ if (isset($_SESSION['mensaje'])) {
                     </tr>
                 </thead>
                 <tbody>
-                    <?php if ($resultado->num_rows > 0): ?>
-                        <?php while($curso = $resultado->fetch_assoc()): ?>
+                    <?php if (!empty($cursos)): // Cambiado de $resultado->num_rows > 0 a !empty($cursos) ?>
+                        <?php foreach($cursos as $curso): // Cambiado de while($curso = $resultado->fetch_assoc()) a foreach ?>
                             <tr>
                                 <td><?php echo htmlspecialchars($curso['codigo_curso']); ?></td>
                                 <td><?php echo htmlspecialchars($curso['nombre_curso']); ?></td>
@@ -76,7 +76,7 @@ if (isset($_SESSION['mensaje'])) {
                                     </a>
                                 </td>
                             </tr>
-                        <?php endwhile; ?>
+                        <?php endforeach; ?>
                     <?php else: ?>
                         <tr>
                             <td colspan="9" class="text-center">No hay cursos registrados.</td>
@@ -89,6 +89,6 @@ if (isset($_SESSION['mensaje'])) {
 </div>
 
 <?php
-$conexion->close();
+// $conexion->close(); // Eliminado
 require_once 'layout/footer.php';
 ?>

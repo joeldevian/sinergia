@@ -1,21 +1,15 @@
 <?php
 require_once 'layout/header.php';
-require_once '../../config/conexion.php';
+require_once '../../config/database.php'; // Cambiado de conexion.php a database.php
 
 // Fetch all active courses for the admin
-$cursos = [];
 $query_cursos = "SELECT 
                     c.id, c.codigo_curso, c.nombre_curso, ca.nombre_carrera
                  FROM cursos c
                  JOIN carreras ca ON c.id_carrera = ca.id
                  WHERE c.estado = 'activo'
                  ORDER BY c.nombre_curso ASC";
-$resultado_cursos = $conexion->query($query_cursos);
-if ($resultado_cursos) {
-    while ($curso = $resultado_cursos->fetch_assoc()) {
-        $cursos[] = $curso;
-    }
-}
+$cursos = select_all($query_cursos); // Usando select_all() de database.php
 ?>
 
 <h1 class="mb-4">Gestionar Notas (Administrador)</h1>
@@ -62,6 +56,6 @@ if ($resultado_cursos) {
 </div>
 
 <?php
-$conexion->close();
+// $conexion->close(); // Eliminado
 require_once 'layout/footer.php';
 ?>

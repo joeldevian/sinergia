@@ -23,13 +23,39 @@ switch ($accion) {
 
 function agregarCurso() {
     try {
-        $codigo_curso = $_POST['codigo_curso'];
-        $nombre_curso = $_POST['nombre_curso'];
-        $creditos = $_POST['creditos'];
-        $horas_semanales = $_POST['horas_semanales'];
-        $id_carrera = $_POST['id_carrera'];
-        $ciclo = $_POST['ciclo'];
-        $tipo = $_POST['tipo'];
+        // 1. Validate input data
+        $codigo_curso = trim($_POST['codigo_curso'] ?? '');
+        $nombre_curso = trim($_POST['nombre_curso'] ?? '');
+        $creditos = filter_var($_POST['creditos'] ?? '', FILTER_VALIDATE_INT);
+        $horas_semanales = filter_var($_POST['horas_semanales'] ?? '', FILTER_VALIDATE_INT);
+        $id_carrera = filter_var($_POST['id_carrera'] ?? '', FILTER_VALIDATE_INT);
+        $ciclo = trim($_POST['ciclo'] ?? '');
+        $tipo = $_POST['tipo'] ?? '';
+
+        $errors = [];
+
+        if (empty($codigo_curso)) $errors[] = "El código del curso es requerido.";
+        if (empty($nombre_curso)) $errors[] = "El nombre del curso es requerido.";
+        if ($creditos === false || $creditos <= 0) $errors[] = "Los créditos deben ser un número entero positivo.";
+        if ($horas_semanales === false || $horas_semanales <= 0) $errors[] = "Las horas semanales deben ser un número entero positivo.";
+        if ($id_carrera === false || $id_carrera <= 0) $errors[] = "Debe seleccionar una carrera válida.";
+        if (empty($ciclo)) $errors[] = "El ciclo es requerido.";
+        if (!in_array($tipo, ['obligatorio', 'electivo'])) $errors[] = "El tipo de curso no es válido.";
+        
+        // Check if id_carrera exists
+        if ($id_carrera !== false && $id_carrera > 0) {
+            $carrera_exists = select_one("SELECT id FROM carreras WHERE id = ?", "i", [$id_carrera]);
+            if (!$carrera_exists) {
+                $errors[] = "La carrera seleccionada no existe.";
+            }
+        }
+
+        if (!empty($errors)) {
+            $_SESSION['mensaje'] = "Errores de validación: " . implode("<br>", $errors);
+            $_SESSION['mensaje_tipo'] = "danger";
+            header("Location: ../vistas/admin/gestionar_cursos.php"); // Or redirect back to form with old data
+            exit();
+        }
 
         $sql = "INSERT INTO cursos (codigo_curso, nombre_curso, creditos, horas_semanales, id_carrera, ciclo, tipo) 
                 VALUES (?, ?, ?, ?, ?, ?, ?)";
@@ -61,15 +87,43 @@ function agregarCurso() {
 
 function editarCurso() {
     try {
-        $id_curso = $_POST['id_curso'];
-        $codigo_curso = $_POST['codigo_curso'];
-        $nombre_curso = $_POST['nombre_curso'];
-        $creditos = $_POST['creditos'];
-        $horas_semanales = $_POST['horas_semanales'];
-        $id_carrera = $_POST['id_carrera'];
-        $ciclo = $_POST['ciclo'];
-        $tipo = $_POST['tipo'];
-        $estado = $_POST['estado'];
+        // 1. Validate input data
+        $id_curso = filter_var($_POST['id_curso'] ?? '', FILTER_VALIDATE_INT);
+        $codigo_curso = trim($_POST['codigo_curso'] ?? '');
+        $nombre_curso = trim($_POST['nombre_curso'] ?? '');
+        $creditos = filter_var($_POST['creditos'] ?? '', FILTER_VALIDATE_INT);
+        $horas_semanales = filter_var($_POST['horas_semanales'] ?? '', FILTER_VALIDATE_INT);
+        $id_carrera = filter_var($_POST['id_carrera'] ?? '', FILTER_VALIDATE_INT);
+        $ciclo = trim($_POST['ciclo'] ?? '');
+        $tipo = $_POST['tipo'] ?? '';
+        $estado = $_POST['estado'] ?? '';
+
+        $errors = [];
+
+        if ($id_curso === false || $id_curso <= 0) $errors[] = "ID de curso no válido.";
+        if (empty($codigo_curso)) $errors[] = "El código del curso es requerido.";
+        if (empty($nombre_curso)) $errors[] = "El nombre del curso es requerido.";
+        if ($creditos === false || $creditos <= 0) $errors[] = "Los créditos deben ser un número entero positivo.";
+        if ($horas_semanales === false || $horas_semanales <= 0) $errors[] = "Las horas semanales deben ser un número entero positivo.";
+        if ($id_carrera === false || $id_carrera <= 0) $errors[] = "Debe seleccionar una carrera válida.";
+        if (empty($ciclo)) $errors[] = "El ciclo es requerido.";
+        if (!in_array($tipo, ['obligatorio', 'electivo'])) $errors[] = "El tipo de curso no es válido.";
+        if (!in_array($estado, ['activo', 'inactivo'])) $errors[] = "El estado del curso no es válido.";
+        
+        // Check if id_carrera exists
+        if ($id_carrera !== false && $id_carrera > 0) {
+            $carrera_exists = select_one("SELECT id FROM carreras WHERE id = ?", "i", [$id_carrera]);
+            if (!$carrera_exists) {
+                $errors[] = "La carrera seleccionada no existe.";
+            }
+        }
+
+        if (!empty($errors)) {
+            $_SESSION['mensaje'] = "Errores de validación: " . implode("<br>", $errors);
+            $_SESSION['mensaje_tipo'] = "danger";
+            header("Location: ../vistas/admin/gestionar_cursos.php"); // Or redirect back to form with old data
+            exit();
+        }
 
         $sql = "UPDATE cursos SET 
                 codigo_curso = ?, nombre_curso = ?, creditos = ?, horas_semanales = ?, 

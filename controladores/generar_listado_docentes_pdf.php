@@ -1,7 +1,7 @@
 <?php
 session_start();
 require('../lib/fpdf/fpdf.php');
-require_once '../config/conexion.php';
+require_once '../config/database.php'; // Cambiado de conexion.php a database.php
 
 // Custom FPDF class for header and footer for teacher list
 class PDF extends FPDF
@@ -39,7 +39,7 @@ if (!isset($_SESSION['user_id']) || $_SESSION['rol'] !== 'admin') {
 
 // Fetch teachers from the database
 $query = "SELECT codigo_docente, dni, apellido_paterno, apellido_materno, nombres, email, estado FROM docentes ORDER BY apellido_paterno ASC";
-$resultado = $conexion->query($query);
+$docentes = select_all($query); // Usando select_all() de database.php
 
 // --- PDF Generation ---
 $pdf = new PDF();
@@ -68,8 +68,8 @@ $pdf->Cell($col_widths[5], 7, utf8_decode('Estado'), 1, 1, 'C', true);
 $pdf->SetFont('Arial', '', 9);
 $pdf->SetFillColor(255, 255, 255); // Reset fill color for data rows
 
-if ($resultado->num_rows > 0) {
-    while($docente = $resultado->fetch_assoc()) {
+if (!empty($docentes)) { // Cambiado de $resultado->num_rows > 0 a !empty($docentes)
+    foreach($docentes as $docente) { // Cambiado de while($docente = $resultado->fetch_assoc()) a foreach
         $pdf->Cell($col_widths[0], 6, utf8_decode($docente['codigo_docente']), 1, 0, 'L');
         $pdf->Cell($col_widths[1], 6, utf8_decode($docente['dni']), 1, 0, 'L');
         $pdf->Cell($col_widths[2], 6, utf8_decode($docente['apellido_paterno'] . ' ' . $docente['apellido_materno']), 1, 0, 'L');
@@ -81,5 +81,5 @@ if ($resultado->num_rows > 0) {
     $pdf->Cell(array_sum($col_widths), 10, utf8_decode('No hay docentes registrados.'), 1, 1, 'C');
 }
 
-$conexion->close();
+// $conexion->close(); // Eliminado, ya que la función select_all() cierra el statement
 $pdf->Output('I', 'Listado_Docentes.pdf');

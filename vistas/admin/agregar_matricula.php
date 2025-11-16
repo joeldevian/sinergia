@@ -1,14 +1,14 @@
 <?php
 require_once 'layout/header.php';
-require_once '../../config/conexion.php';
+require_once '../../config/database.php'; // Cambiado de conexion.php a database.php
 
 // Fetch active students for the dropdown
 $query_estudiantes = "SELECT id, CONCAT(nombres, ' ', apellido_paterno, ' ', apellido_materno) AS nombre_completo FROM estudiantes WHERE estado = 'activo' ORDER BY nombre_completo ASC";
-$resultado_estudiantes = $conexion->query($query_estudiantes);
+$estudiantes = select_all($query_estudiantes); // Usando select_all() de database.php
 
 // Fetch active courses for the dropdown
 $query_cursos = "SELECT id, nombre_curso FROM cursos WHERE estado = 'activo' ORDER BY nombre_curso ASC";
-$resultado_cursos = $conexion->query($query_cursos);
+$cursos = select_all($query_cursos); // Usando select_all() de database.php
 ?>
 
 <h1 class="mb-4">Agregar Nueva Matrícula</h1>
@@ -25,18 +25,18 @@ $resultado_cursos = $conexion->query($query_cursos);
                     <label for="id_estudiante" class="form-label">Estudiante</label>
                     <select class="form-select" id="id_estudiante" name="id_estudiante" required>
                         <option value="">Seleccione un estudiante</option>
-                        <?php while($estudiante = $resultado_estudiantes->fetch_assoc()): ?>
+                        <?php foreach($estudiantes as $estudiante): // Cambiado de while a foreach ?>
                             <option value="<?php echo $estudiante['id']; ?>"><?php echo htmlspecialchars($estudiante['nombre_completo']); ?></option>
-                        <?php endwhile; ?>
+                        <?php endforeach; ?>
                     </select>
                 </div>
                 <div class="col-md-6 mb-3">
                     <label for="id_curso" class="form-label">Curso</label>
                     <select class="form-select" id="id_curso" name="id_curso" required>
                         <option value="">Seleccione un curso</option>
-                        <?php while($curso = $resultado_cursos->fetch_assoc()): ?>
+                        <?php foreach($cursos as $curso): // Cambiado de while a foreach ?>
                             <option value="<?php echo $curso['id']; ?>"><?php echo htmlspecialchars($curso['nombre_curso']); ?></option>
-                        <?php endwhile; ?>
+                        <?php endforeach; ?>
                     </select>
                 </div>
                 <div class="col-md-6 mb-3">
@@ -58,6 +58,6 @@ $resultado_cursos = $conexion->query($query_cursos);
 </div>
 
 <?php
-$conexion->close();
+// $conexion->close(); // Eliminado
 require_once 'layout/footer.php';
 ?>

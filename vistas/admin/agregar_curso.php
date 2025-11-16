@@ -1,10 +1,10 @@
 <?php
 require_once 'layout/header.php';
-require_once '../../config/conexion.php';
+require_once '../../config/database.php'; // Cambiado de conexion.php a database.php
 
 // Fetch careers for the dropdown
 $query_carreras = "SELECT id, nombre_carrera FROM carreras WHERE estado = 'activa' ORDER BY nombre_carrera ASC";
-$resultado_carreras = $conexion->query($query_carreras);
+$carreras = select_all($query_carreras); // Usando select_all() de database.php
 ?>
 
 <h1 class="mb-4">Agregar Nuevo Curso</h1>
@@ -37,9 +37,9 @@ $resultado_carreras = $conexion->query($query_carreras);
                     <label for="id_carrera" class="form-label">Carrera</label>
                     <select class="form-select" id="id_carrera" name="id_carrera" required>
                         <option value="">Seleccione una carrera</option>
-                        <?php while($carrera = $resultado_carreras->fetch_assoc()): ?>
+                        <?php foreach($carreras as $carrera): // Cambiado de while a foreach ?>
                             <option value="<?php echo $carrera['id']; ?>"><?php echo htmlspecialchars($carrera['nombre_carrera']); ?></option>
-                        <?php endwhile; ?>
+                        <?php endforeach; ?>
                     </select>
                 </div>
                 <div class="col-md-6 mb-3">
@@ -64,6 +64,6 @@ $resultado_carreras = $conexion->query($query_carreras);
 </div>
 
 <?php
-$conexion->close();
+// $conexion->close(); // Eliminado, ya que la función select_all() cierra el statement
 require_once 'layout/footer.php';
 ?>

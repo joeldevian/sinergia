@@ -60,3 +60,34 @@ Desarrollar un Sistema Web de Gestión Académica para INSTITUTO SINERGIA utiliz
 -   Continuar con las mejoras propuestas o nuevas ideas del usuario.
 
 ---
+--- Avance Reciente (14 de noviembre de 2025) ---
+
+**Rediseño Visual y UX:**
+*   Implementación de un **diseño visual profesional y moderno** basado en el color rojo institucional.
+*   Ajuste de la paleta de colores principal a `#CD1714` y sus variantes.
+*   Personalización de colores para las tarjetas de los dashboards de Administrador, Docente y Estudiante, con texto oscuro para mejorar la legibilidad.
+*   Estandarización de la altura y alineación de las tarjetas en todos los dashboards para una apariencia uniforme.
+*   Corrección de la visualización de los controles de paginación de DataTables para eliminar bordes duplicados y ajustar espaciados.
+*   Implementación del **resaltado automático del enlace activo** en la barra lateral para mejorar la navegación.
+
+**Funcionalidad y Estabilidad:**
+*   Activación de la **paginación y búsqueda de DataTables** en todas las tablas de las secciones de Docente y Estudiante.
+*   Corrección de un conflicto de JavaScript al cargar DataTables, asegurando que jQuery se cargue correctamente.
+
+**Calidad de Código y Seguridad (Refactorización Mayor):**
+*   **Refactorización completa del layout:** Se centralizó el código duplicado de cabeceras y pies de página en archivos comunes (`vistas/layout/header.php`, `vistas/layout/footer.php`, `vistas/layout/sidebar.php`), mejorando drásticamente la mantenibilidad.
+*   Creación de una **capa de abstracción de base de datos** (`config/database.php`) para centralizar y estandarizar las interacciones con la base de datos.
+*   **Refactorización de TODOS los controladores principales** (`docente_controller.php`, `estudiante_controller.php`, `curso_controller.php`, `nota_controller.php`, `asistencia_controller.php`, `evaluacion_controller.php`, `matricula_controller.php`, `asignacion_controller.php`, `perfil_controller.php`) para utilizar esta nueva capa de base de datos, garantizando seguridad (consultas preparadas), limpieza y consistencia en todo el sistema.
+
+**Nuevas Funcionalidades:**
+*   Implementación de páginas de **"Mi Perfil" para Administradores y Docentes**, permitiéndoles cambiar su contraseña de forma segura.
+
+**Validación de Formularios (Inicio):**
+*   Implementación de **validación de formularios en tiempo real** (Bootstrap 5) para los formularios de "Agregar Estudiante" y "Editar Docente", proporcionando retroalimentación instantánea al usuario.
+*   Resolución de un conflicto de carga de scripts que impedía la visualización de la validación, moviendo el script de validación al footer común.
+
+**Estado Actual del Proyecto:**
+El sistema es ahora mucho más robusto, seguro, mantenible y ofrece una experiencia de usuario mejorada. Todas las funcionalidades existentes han sido revisadas y optimizadas.
+
+**Próximos Pasos (Pendiente):**
+*   Continuar implementando la validación de formularios en tiempo real para el resto de formularios del sistema.

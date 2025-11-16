@@ -1,14 +1,14 @@
 <?php
 require_once 'layout/header.php';
-require_once '../../config/conexion.php';
+require_once '../../config/database.php'; // Cambiado de conexion.php a database.php
 
 // Fetch active teachers for the dropdown
 $query_docentes = "SELECT id, CONCAT(nombres, ' ', apellido_paterno) AS nombre_completo FROM docentes WHERE estado = 'activo' ORDER BY nombre_completo ASC";
-$resultado_docentes = $conexion->query($query_docentes);
+$docentes = select_all($query_docentes); // Usando select_all() de database.php
 
 // Fetch active courses for the dropdown
 $query_cursos = "SELECT id, nombre_curso FROM cursos WHERE estado = 'activo' ORDER BY nombre_curso ASC";
-$resultado_cursos = $conexion->query($query_cursos);
+$cursos = select_all($query_cursos); // Usando select_all() de database.php
 
 // Fetch existing assignments
 $query_asignaciones = "SELECT 
@@ -20,7 +20,7 @@ $query_asignaciones = "SELECT
                          JOIN docentes d ON dc.id_docente = d.id
                          JOIN cursos c ON dc.id_curso = c.id
                          ORDER BY dc.periodo_academico DESC, nombre_docente, nombre_curso";
-$resultado_asignaciones = $conexion->query($query_asignaciones);
+$asignaciones = select_all($query_asignaciones); // Usando select_all() de database.php
 ?>
 
 <h1 class="mb-4">Gestionar Asignaciones (Docente-Curso)</h1>
@@ -49,18 +49,18 @@ if (isset($_SESSION['mensaje'])) {
                     <label for="id_docente" class="form-label">Docente</label>
                     <select class="form-select" id="id_docente" name="id_docente" required>
                         <option value="">Seleccione un docente</option>
-                        <?php while($docente = $resultado_docentes->fetch_assoc()): ?>
+                        <?php foreach($docentes as $docente): // Cambiado de while a foreach ?>
                             <option value="<?php echo $docente['id']; ?>"><?php echo htmlspecialchars($docente['nombre_completo']); ?></option>
-                        <?php endwhile; ?>
+                        <?php endforeach; ?>
                     </select>
                 </div>
                 <div class="col-md-4 mb-3">
                     <label for="id_curso" class="form-label">Curso</label>
                     <select class="form-select" id="id_curso" name="id_curso" required>
                         <option value="">Seleccione un curso</option>
-                        <?php while($curso = $resultado_cursos->fetch_assoc()): ?>
+                        <?php foreach($cursos as $curso): // Cambiado de while a foreach ?>
                             <option value="<?php echo $curso['id']; ?>"><?php echo htmlspecialchars($curso['nombre_curso']); ?></option>
-                        <?php endwhile; ?>
+                        <?php endforeach; ?>
                     </select>
                 </div>
                 <div class="col-md-3 mb-3">
@@ -92,8 +92,8 @@ if (isset($_SESSION['mensaje'])) {
                     </tr>
                 </thead>
                 <tbody>
-                    <?php if ($resultado_asignaciones->num_rows > 0): ?>
-                        <?php while($asignacion = $resultado_asignaciones->fetch_assoc()): ?>
+                    <?php if (!empty($asignaciones)): // Cambiado de $resultado_asignaciones->num_rows > 0 a !empty($asignaciones) ?>
+                        <?php foreach($asignaciones as $asignacion): // Cambiado de while($asignacion = $resultado_asignaciones->fetch_assoc()) a foreach ?>
                             <tr>
                                 <td><?php echo htmlspecialchars($asignacion['nombre_docente']); ?></td>
                                 <td><?php echo htmlspecialchars($asignacion['nombre_curso']); ?></td>
@@ -104,7 +104,7 @@ if (isset($_SESSION['mensaje'])) {
                                     </a>
                                 </td>
                             </tr>
-                        <?php endwhile; ?>
+                        <?php endforeach; ?>
                     <?php else: ?>
                         <tr>
                             <td colspan="4" class="text-center">No hay asignaciones registradas.</td>
@@ -117,6 +117,6 @@ if (isset($_SESSION['mensaje'])) {
 </div>
 
 <?php
-$conexion->close();
+// $conexion->close(); // Eliminado
 require_once 'layout/footer.php';
 ?>

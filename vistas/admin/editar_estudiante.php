@@ -32,7 +32,7 @@ $stmt->close();
         <h5 class="mb-0">Datos del Estudiante</h5>
     </div>
     <div class="card-body">
-        <form action="../../controladores/estudiante_controller.php" method="POST">
+        <form action="../../controladores/estudiante_controller.php" method="POST" class="needs-validation" novalidate>
             <input type="hidden" name="accion" value="editar">
             <input type="hidden" name="id_estudiante" value="<?php echo $estudiante['id']; ?>">
             <input type="hidden" name="id_user" value="<?php echo $estudiante['id_user']; ?>">
@@ -41,10 +41,16 @@ $stmt->close();
                 <div class="col-md-6 mb-3">
                     <label for="nombres" class="form-label">Nombres</label>
                     <input type="text" class="form-control" id="nombres" name="nombres" value="<?php echo htmlspecialchars($estudiante['nombres']); ?>" required>
+                    <div class="invalid-feedback">
+                        Por favor, ingrese los nombres.
+                    </div>
                 </div>
                 <div class="col-md-6 mb-3">
                     <label for="apellido_paterno" class="form-label">Apellido Paterno</label>
                     <input type="text" class="form-control" id="apellido_paterno" name="apellido_paterno" value="<?php echo htmlspecialchars($estudiante['apellido_paterno']); ?>" required>
+                    <div class="invalid-feedback">
+                        Por favor, ingrese el apellido paterno.
+                    </div>
                 </div>
                 <div class="col-md-6 mb-3">
                     <label for="apellido_materno" class="form-label">Apellido Materno</label>
@@ -52,19 +58,31 @@ $stmt->close();
                 </div>
                 <div class="col-md-6 mb-3">
                     <label for="dni" class="form-label">DNI</label>
-                    <input type="text" class="form-control" id="dni" name="dni" value="<?php echo htmlspecialchars($estudiante['dni']); ?>" required>
+                    <input type="text" class="form-control" id="dni" name="dni" value="<?php echo htmlspecialchars($estudiante['dni']); ?>" required pattern="[0-9]{8}" title="El DNI debe contener 8 dígitos.">
+                    <div class="invalid-feedback">
+                        Por favor, ingrese un DNI válido de 8 dígitos.
+                    </div>
                 </div>
                 <div class="col-md-6 mb-3">
                     <label for="codigo_estudiante" class="form-label">Código de Estudiante</label>
                     <input type="text" class="form-control" id="codigo_estudiante" name="codigo_estudiante" value="<?php echo htmlspecialchars($estudiante['codigo_estudiante']); ?>" required>
+                    <div class="invalid-feedback">
+                        Por favor, ingrese el código de estudiante.
+                    </div>
                 </div>
                 <div class="col-md-6 mb-3">
                     <label for="email" class="form-label">Email</label>
                     <input type="email" class="form-control" id="email" name="email" value="<?php echo htmlspecialchars($estudiante['email']); ?>" required>
+                    <div class="invalid-feedback">
+                        Por favor, ingrese un email válido.
+                    </div>
                 </div>
                 <div class="col-md-6 mb-3">
                     <label for="telefono" class="form-label">Teléfono</label>
-                    <input type="text" class="form-control" id="telefono" name="telefono" value="<?php echo htmlspecialchars($estudiante['telefono']); ?>">
+                    <input type="text" class="form-control" id="telefono" name="telefono" value="<?php echo htmlspecialchars($estudiante['telefono']); ?>" pattern="[0-9]{9,15}">
+                    <div class="invalid-feedback">
+                        Por favor, ingrese un número de teléfono válido.
+                    </div>
                 </div>
                 <div class="col-md-6 mb-3">
                     <label for="fecha_nacimiento" class="form-label">Fecha de Nacimiento</label>
@@ -97,7 +115,10 @@ $stmt->close();
             <div class="row">
                 <div class="col-md-6 mb-3">
                     <label for="password" class="form-label">Nueva Contraseña</label>
-                    <input type="password" class="form-control" id="password" name="password">
+                    <input type="password" class="form-control" id="password" name="password" minlength="6">
+                    <div class="invalid-feedback">
+                        La contraseña debe tener al menos 6 caracteres.
+                    </div>
                     <div class="form-text">Dejar en blanco para no cambiar la contraseña.</div>
                 </div>
             </div>
@@ -109,6 +130,28 @@ $stmt->close();
         </form>
     </div>
 </div>
+
+<script>
+// Example starter JavaScript for disabling form submissions if there are invalid fields
+(() => {
+  'use strict'
+
+  // Fetch all the forms we want to apply custom Bootstrap validation styles to
+  const forms = document.querySelectorAll('.needs-validation')
+
+  // Loop over them and prevent submission
+  Array.from(forms).forEach(form => {
+    form.addEventListener('submit', event => {
+      if (!form.checkValidity()) {
+        event.preventDefault()
+        event.stopPropagation()
+      }
+
+      form.classList.add('was-validated')
+    }, false)
+  })
+})()
+</script>
 
 <?php
 $conexion->close();

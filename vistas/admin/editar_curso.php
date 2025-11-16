@@ -1,6 +1,6 @@
 <?php
 require_once 'layout/header.php';
-require_once '../../config/conexion.php';
+require_once '../../config/database.php'; // Cambiado de conexion.php a database.php
 
 $id_curso = $_GET['id'] ?? 0;
 
@@ -9,13 +9,8 @@ if ($id_curso == 0) {
     exit();
 }
 
-// Fetch course data
-$stmt_curso = $conexion->prepare("SELECT * FROM cursos WHERE id = ?");
-$stmt_curso->bind_param("i", $id_curso);
-$stmt_curso->execute();
-$resultado_curso = $stmt_curso->get_result();
-$curso = $resultado_curso->fetch_assoc();
-$stmt_curso->close();
+// Fetch course data using select_one from the abstraction layer
+$curso = select_one("SELECT * FROM cursos WHERE id = ?", "i", [$id_curso]);
 
 if (!$curso) {
     header("Location: gestionar_cursos.php");
@@ -24,7 +19,7 @@ if (!$curso) {
 
 // Fetch careers for the dropdown
 $query_carreras = "SELECT id, nombre_carrera FROM carreras WHERE estado = 'activa' ORDER BY nombre_carrera ASC";
-$resultado_carreras = $conexion->query($query_carreras);
+$carreras = select_all($query_carreras); // Usando select_all() de database.php
 ?>
 
 <h1 class="mb-4">Editar Curso</h1>
@@ -58,11 +53,11 @@ $resultado_carreras = $conexion->query($query_carreras);
                     <label for="id_carrera" class="form-label">Carrera</label>
                     <select class="form-select" id="id_carrera" name="id_carrera" required>
                         <option value="">Seleccione una carrera</option>
-                        <?php while($carrera = $resultado_carreras->fetch_assoc()): ?>
+                        <?php foreach($carreras as $carrera): // Cambiado de while a foreach ?>
                             <option value="<?php echo $carrera['id']; ?>" <?php echo ($carrera['id'] == $curso['id_carrera']) ? 'selected' : ''; ?>>
                                 <?php echo htmlspecialchars($carrera['nombre_carrera']); ?>
                             </option>
-                        <?php endwhile; ?>
+                        <?php endforeach; ?>
                     </select>
                 </div>
                 <div class="col-md-6 mb-3">
@@ -94,6 +89,6 @@ $resultado_carreras = $conexion->query($query_carreras);
 </div>
 
 <?php
-$conexion->close();
+// $conexion->close(); // Eliminado
 require_once 'layout/footer.php';
 ?>

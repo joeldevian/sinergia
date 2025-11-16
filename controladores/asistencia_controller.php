@@ -20,22 +20,46 @@ switch ($accion) {
 
 function guardarAsistencia() {
     global $conexion;
-    $id_curso = $_POST['id_curso'] ?? 0;
+    $id_curso = filter_var($_POST['id_curso'] ?? '', FILTER_VALIDATE_INT);
     $fecha = $_POST['fecha'] ?? '';
     $asistencia_enviada = $_POST['asistencia'] ?? [];
     $registrado_por = $_SESSION['user_id'];
 
-    if ($id_curso == 0 || empty($fecha)) {
-        $_SESSION['mensaje'] = "Datos incompletos para guardar asistencia.";
+    $errors = [];
+
+    if ($id_curso === false || $id_curso <= 0) $errors[] = "ID de curso no válido.";
+    if (empty($fecha)) $errors[] = "La fecha es requerida.";
+    // Basic date format validation (YYYY-MM-DD)
+    if (!preg_match("/^\d{4}-\d{2}-\d{2}$/", $fecha)) $errors[] = "Formato de fecha no válido.";
+
+    if (!is_array($asistencia_enviada) || empty($asistencia_enviada)) {
+        $errors[] = "No se recibieron datos de asistencia.";
+    } else {
+        $allowed_estados = ['presente', 'ausente', 'tardanza']; // Define allowed attendance states
+        foreach ($asistencia_enviada as $id_estudiante_str => $estado) {
+            $id_estudiante = filter_var($id_estudiante_str, FILTER_VALIDATE_INT);
+            if ($id_estudiante === false || $id_estudiante <= 0) {
+                $errors[] = "ID de estudiante no válido en los datos de asistencia.";
+            }
+            if (!in_array($estado, $allowed_estados)) {
+                $errors[] = "Estado de asistencia no válido para el estudiante {$id_estudiante_str}.";
+            }
+        }
+    }
+
+    if (!empty($errors)) {
+        $_SESSION['mensaje'] = "Errores de validación: " . implode("<br>", $errors);
         $_SESSION['mensaje_tipo'] = "danger";
-        header("Location: ../vistas/docente/mis_cursos.php");
+        header("Location: ../vistas/docente/mis_cursos.php"); // Redirect to a general page or specific error page
         exit();
     }
 
     $conexion->begin_transaction();
 
     try {
-        foreach ($asistencia_enviada as $id_estudiante => $estado) {
+        foreach ($asistencia_enviada as $id_estudiante_str => $estado) {
+            $id_estudiante = (int)$id_estudiante_str; // Already validated as int
+
             // Verificar si el registro de asistencia ya existe
             $sql_check = "SELECT id FROM asistencia WHERE id_estudiante = ? AND id_curso = ? AND fecha = ?";
             $existing_attendance = select_one($sql_check, "iis", [$id_estudiante, $id_curso, $fecha]);

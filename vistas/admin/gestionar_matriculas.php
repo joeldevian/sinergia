@@ -1,6 +1,6 @@
 <?php
 require_once 'layout/header.php';
-require_once '../../config/conexion.php';
+require_once '../../config/database.php'; // Cambiado de conexion.php a database.php
 
 // Fetch enrollments from the database
 $query = "SELECT m.id, CONCAT(e.nombres, ' ', e.apellido_paterno, ' ', e.apellido_materno) AS nombre_estudiante, 
@@ -9,7 +9,7 @@ $query = "SELECT m.id, CONCAT(e.nombres, ' ', e.apellido_paterno, ' ', e.apellid
           JOIN estudiantes e ON m.id_estudiante = e.id
           JOIN cursos c ON m.id_curso = c.id
           ORDER BY m.fecha_matricula DESC";
-$resultado = $conexion->query($query);
+$matriculas = select_all($query); // Usando select_all() de database.php
 ?>
 
 <h1 class="mb-4">Gestionar Matrículas</h1>
@@ -46,8 +46,8 @@ if (isset($_SESSION['mensaje'])) {
                     </tr>
                 </thead>
                 <tbody>
-                    <?php if ($resultado->num_rows > 0): ?>
-                        <?php while($matricula = $resultado->fetch_assoc()): ?>
+                    <?php if (!empty($matriculas)): // Cambiado de $resultado->num_rows > 0 a !empty($matriculas) ?>
+                        <?php foreach($matriculas as $matricula): // Cambiado de while($matricula = $resultado->fetch_assoc()) a foreach ?>
                             <tr>
                                 <td><?php echo htmlspecialchars($matricula['nombre_estudiante']); ?></td>
                                 <td><?php echo htmlspecialchars($matricula['nombre_curso']); ?></td>
@@ -73,7 +73,7 @@ if (isset($_SESSION['mensaje'])) {
                                     </a>
                                 </td>
                             </tr>
-                        <?php endwhile; ?>
+                        <?php endforeach; ?>
                     <?php else: ?>
                         <tr>
                             <td colspan="6" class="text-center">No hay matrículas registradas.</td>
@@ -86,6 +86,6 @@ if (isset($_SESSION['mensaje'])) {
 </div>
 
 <?php
-$conexion->close();
+// $conexion->close(); // Eliminado
 require_once 'layout/footer.php';
 ?>

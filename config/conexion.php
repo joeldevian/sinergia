@@ -1,8 +1,8 @@
 <?php
-$host = "localhost";
-$user = "root";
-$password = "";
-$database = "sinergia";
+$host = $_ENV['DB_HOST'] ?? "localhost";
+$user = $_ENV['DB_USER'] ?? "root";
+$password = $_ENV['DB_PASSWORD'] ?? "";
+$database = $_ENV['DB_DATABASE'] ?? "sinergia";
 
 $conexion = new mysqli($host, $user, $password, $database);
 

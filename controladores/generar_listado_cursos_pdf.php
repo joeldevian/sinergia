@@ -1,7 +1,7 @@
 <?php
 session_start();
 require('../lib/fpdf/fpdf.php');
-require_once '../config/conexion.php';
+require_once '../config/database.php'; // Cambiado de conexion.php a database.php
 
 // Custom FPDF class for header and footer for course list
 class PDF extends FPDF
@@ -42,7 +42,7 @@ $query = "SELECT c.codigo_curso, c.nombre_curso, c.creditos, c.horas_semanales, 
           FROM cursos c
           JOIN carreras ca ON c.id_carrera = ca.id
           ORDER BY ca.nombre_carrera, c.nombre_curso ASC";
-$resultado = $conexion->query($query);
+$cursos = select_all($query); // Usando select_all() de database.php
 
 // --- PDF Generation ---
 $pdf = new PDF();
@@ -73,8 +73,8 @@ $pdf->Cell($col_widths[7], 7, utf8_decode('Estado'), 1, 1, 'C', true);
 $pdf->SetFont('Arial', '', 8); // Smaller font for data rows
 $pdf->SetFillColor(255, 255, 255); // Reset fill color for data rows
 
-if ($resultado->num_rows > 0) {
-    while($curso = $resultado->fetch_assoc()) {
+if (!empty($cursos)) { // Cambiado de $resultado->num_rows > 0 a !empty($cursos)
+    foreach($cursos as $curso) { // Cambiado de while($curso = $resultado->fetch_assoc()) a foreach
         $pdf->Cell($col_widths[0], 6, utf8_decode($curso['codigo_curso']), 1, 0, 'L');
         $pdf->Cell($col_widths[1], 6, utf8_decode($curso['nombre_curso']), 1, 0, 'L');
         $pdf->Cell($col_widths[2], 6, utf8_decode($curso['creditos']), 1, 0, 'C');
@@ -88,5 +88,5 @@ if ($resultado->num_rows > 0) {
     $pdf->Cell(array_sum($col_widths), 10, utf8_decode('No hay cursos registrados.'), 1, 1, 'C');
 }
 
-$conexion->close();
+// $conexion->close(); // Eliminado, ya que la función select_all() cierra el statement
 $pdf->Output('I', 'Listado_Cursos.pdf');

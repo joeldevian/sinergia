@@ -1,6 +1,6 @@
 <?php
 require_once 'layout/header.php';
-require_once '../../config/conexion.php';
+require_once '../../config/database.php'; // Cambiado de conexion.php a database.php
 
 $id_evaluacion = $_GET['id'] ?? 0;
 
@@ -9,13 +9,8 @@ if ($id_evaluacion == 0) {
     exit();
 }
 
-// Fetch evaluation data
-$stmt_evaluacion = $conexion->prepare("SELECT * FROM evaluaciones WHERE id = ?");
-$stmt_evaluacion->bind_param("i", $id_evaluacion);
-$stmt_evaluacion->execute();
-$resultado_evaluacion = $stmt_evaluacion->get_result();
-$evaluacion = $resultado_evaluacion->fetch_assoc();
-$stmt_evaluacion->close();
+// Fetch evaluation data using select_one from the abstraction layer
+$evaluacion = select_one("SELECT * FROM evaluaciones WHERE id = ?", "i", [$id_evaluacion]);
 
 if (!$evaluacion) {
     header("Location: gestionar_evaluaciones.php");
@@ -24,7 +19,7 @@ if (!$evaluacion) {
 
 // Fetch active courses for the dropdown
 $query_cursos_dropdown = "SELECT id, nombre_curso FROM cursos WHERE estado = 'activo' ORDER BY nombre_curso ASC";
-$resultado_cursos_dropdown = $conexion->query($query_cursos_dropdown);
+$cursos_dropdown = select_all($query_cursos_dropdown); // Usando select_all() de database.php
 ?>
 
 <h1 class="mb-4">Editar Evaluación</h1>
@@ -42,11 +37,11 @@ $resultado_cursos_dropdown = $conexion->query($query_cursos_dropdown);
                     <label for="id_curso" class="form-label">Curso</label>
                     <select class="form-select" id="id_curso" name="id_curso" required>
                         <option value="">Seleccione un curso</option>
-                        <?php while($curso = $resultado_cursos_dropdown->fetch_assoc()): ?>
+                        <?php foreach($cursos_dropdown as $curso): // Cambiado de while a foreach ?>
                             <option value="<?php echo $curso['id']; ?>" <?php echo ($curso['id'] == $evaluacion['id_curso']) ? 'selected' : ''; ?>>
                                 <?php echo htmlspecialchars($curso['nombre_curso']); ?>
                             </option>
-                        <?php endwhile; ?>
+                        <?php endforeach; ?>
                     </select>
                 </div>
                 <div class="col-md-6 mb-3">
@@ -68,6 +63,6 @@ $resultado_cursos_dropdown = $conexion->query($query_cursos_dropdown);
 </div>
 
 <?php
-$conexion->close();
+// $conexion->close(); // Eliminado
 require_once 'layout/footer.php';
 ?>

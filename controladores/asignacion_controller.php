@@ -20,9 +20,41 @@ switch ($accion) {
 
 function agregarAsignacion() {
     try {
-        $id_docente = $_POST['id_docente'];
-        $id_curso = $_POST['id_curso'];
-        $periodo_academico = $_POST['periodo_academico'];
+        // 1. Validate input data
+        $id_docente = filter_var($_POST['id_docente'] ?? '', FILTER_VALIDATE_INT);
+        $id_curso = filter_var($_POST['id_curso'] ?? '', FILTER_VALIDATE_INT);
+        $periodo_academico = trim($_POST['periodo_academico'] ?? '');
+
+        $errors = [];
+
+        if ($id_docente === false || $id_docente <= 0) $errors[] = "Debe seleccionar un docente válido.";
+        if ($id_curso === false || $id_curso <= 0) $errors[] = "Debe seleccionar un curso válido.";
+        if (empty($periodo_academico)) $errors[] = "El periodo académico es requerido.";
+        // Example: Validate academic period format (e.g., 2025-I, 2025-II)
+        if (!preg_match('/^\d{4}-[I|II]$/', $periodo_academico)) $errors[] = "El formato del periodo académico no es válido (ej. 2025-I).";
+
+        // Check if docente exists
+        if ($id_docente !== false && $id_docente > 0) {
+            $docente_exists = select_one("SELECT id FROM docentes WHERE id = ?", "i", [$id_docente]);
+            if (!$docente_exists) {
+                $errors[] = "El docente seleccionado no existe.";
+            }
+        }
+
+        // Check if curso exists
+        if ($id_curso !== false && $id_curso > 0) {
+            $curso_exists = select_one("SELECT id FROM cursos WHERE id = ?", "i", [$id_curso]);
+            if (!$curso_exists) {
+                $errors[] = "El curso seleccionado no existe.";
+            }
+        }
+
+        if (!empty($errors)) {
+            $_SESSION['mensaje'] = "Errores de validación: " . implode("<br>", $errors);
+            $_SESSION['mensaje_tipo'] = "danger";
+            header("Location: ../vistas/admin/gestionar_asignaciones.php");
+            exit();
+        }
 
         $sql = "INSERT INTO docente_curso (id_docente, id_curso, periodo_academico) VALUES (?, ?, ?)";
         

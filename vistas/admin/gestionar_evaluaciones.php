@@ -1,10 +1,10 @@
 <?php
 require_once 'layout/header.php';
-require_once '../../config/conexion.php';
+require_once '../../config/database.php'; // Cambiado de conexion.php a database.php
 
 // Fetch active courses for the dropdown
 $query_cursos_dropdown = "SELECT id, nombre_curso FROM cursos WHERE estado = 'activo' ORDER BY nombre_curso ASC";
-$resultado_cursos_dropdown = $conexion->query($query_cursos_dropdown);
+$cursos_dropdown = select_all($query_cursos_dropdown); // Usando select_all() de database.php
 
 // Fetch existing evaluations, grouped by course
 $query_evaluaciones = "SELECT 
@@ -13,11 +13,11 @@ $query_evaluaciones = "SELECT
                          FROM evaluaciones e
                          JOIN cursos c ON e.id_curso = c.id
                          ORDER BY c.nombre_curso ASC, e.nombre_evaluacion ASC";
-$resultado_evaluaciones = $conexion->query($query_evaluaciones);
+$todas_evaluaciones = select_all($query_evaluaciones); // Usando select_all() de database.php
 
 $evaluaciones_por_curso = [];
-if ($resultado_evaluaciones->num_rows > 0) {
-    while ($evaluacion = $resultado_evaluaciones->fetch_assoc()) {
+if (!empty($todas_evaluaciones)) {
+    foreach ($todas_evaluaciones as $evaluacion) {
         $evaluaciones_por_curso[$evaluacion['nombre_curso']][] = $evaluacion;
     }
 }
@@ -49,9 +49,9 @@ if (isset($_SESSION['mensaje'])) {
                     <label for="id_curso" class="form-label">Curso</label>
                     <select class="form-select" id="id_curso" name="id_curso" required>
                         <option value="">Seleccione un curso</option>
-                        <?php while($curso = $resultado_cursos_dropdown->fetch_assoc()): ?>
+                        <?php foreach($cursos_dropdown as $curso): // Cambiado de while a foreach ?>
                             <option value="<?php echo $curso['id']; ?>"><?php echo htmlspecialchars($curso['nombre_curso']); ?></option>
-                        <?php endwhile; ?>
+                        <?php endforeach; ?>
                     </select>
                 </div>
                 <div class="col-md-4 mb-3">
@@ -116,6 +116,6 @@ if (isset($_SESSION['mensaje'])) {
 </div>
 
 <?php
-$conexion->close();
+// $conexion->close(); // Eliminado
 require_once 'layout/footer.php';
 ?>

@@ -1,10 +1,10 @@
 <?php
 require_once 'layout/header.php';
-require_once '../../config/conexion.php';
+require_once '../../config/database.php'; // Cambiado de conexion.php a database.php
 
 // Fetch teachers from the database
 $query = "SELECT id, codigo_docente, dni, apellido_paterno, apellido_materno, nombres, email, estado FROM docentes ORDER BY apellido_paterno ASC";
-$resultado = $conexion->query($query);
+$docentes = select_all($query); // Usando select_all() de database.php
 ?>
 
 <h1 class="mb-4">Gestionar Docentes</h1>
@@ -47,8 +47,8 @@ if (isset($_SESSION['mensaje'])) {
                     </tr>
                 </thead>
                 <tbody>
-                    <?php if ($resultado->num_rows > 0): ?>
-                        <?php while($docente = $resultado->fetch_assoc()): ?>
+                    <?php if (!empty($docentes)): // Cambiado de $resultado->num_rows > 0 a !empty($docentes) ?>
+                        <?php foreach($docentes as $docente): // Cambiado de while($docente = $resultado->fetch_assoc()) a foreach ?>
                             <tr>
                                 <td><?php echo htmlspecialchars($docente['codigo_docente']); ?></td>
                                 <td><?php echo htmlspecialchars($docente['dni']); ?></td>
@@ -69,7 +69,7 @@ if (isset($_SESSION['mensaje'])) {
                                     </a>
                                 </td>
                             </tr>
-                        <?php endwhile; ?>
+                        <?php endforeach; ?>
                     <?php else: ?>
                         <tr>
                             <td colspan="7" class="text-center">No hay docentes registrados.</td>
@@ -82,6 +82,6 @@ if (isset($_SESSION['mensaje'])) {
 </div>
 
 <?php
-$conexion->close();
+// $conexion->close(); // Eliminado, ya que la función select_all() cierra el statement
 require_once 'layout/footer.php';
 ?>
