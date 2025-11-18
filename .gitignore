@@ -1,0 +1,31 @@
+# Credenciales sensibles (NUNCA subir)
+config/email_config.php
+config/database.php
+.env
+.env.local
+.env.production
+
+# Plantillas SÍ se suben (para que otros sepan cómo configurar)
+# !config/email_config.template.php
+# !config/database.template.php
+
+# Carpetas pesadas o generadas automáticamente
+/vendor/
+/node_modules/
+/storage/logs/
+/storage/framework/
+/storage/app/public/
+/cache/
+/uploads/temp/
+
+# Archivos de XAMPP y sistema
+Thumbs.db
+.DS_Store
+*.log
+*.sql
+*.bak
+
+# IDEs
+.idea/
+.vscode/
+*.sublime-*

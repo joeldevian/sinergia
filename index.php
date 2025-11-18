@@ -21,6 +21,12 @@ if (isset($_SESSION['login_error'])) {
     $error_message = $_SESSION['login_error'];
     unset($_SESSION['login_error']); // Limpiar el mensaje de error después de mostrarlo
 }
+
+$success_message = '';
+if (isset($_SESSION['login_success_message'])) {
+    $success_message = $_SESSION['login_success_message'];
+    unset($_SESSION['login_success_message']); // Limpiar el mensaje de éxito después de mostrarlo
+}
 ?>
 <!DOCTYPE html>
 <html lang="es">
@@ -51,9 +57,14 @@ if (isset($_SESSION['login_error'])) {
                     </div>
                     <div class="card-body p-4">
                         <h4 class="card-title text-center mb-4">Iniciar Sesión</h4>
+                        <?php if ($success_message): ?>
+                            <div class="alert alert-success text-center" role="alert">
+                                <?php echo htmlspecialchars($success_message); ?>
+                            </div>
+                        <?php endif; ?>
                         <?php if ($error_message): ?>
                             <div class="alert alert-danger text-center" role="alert">
-                                <?php echo $error_message; ?>
+                                <?php echo htmlspecialchars($error_message); ?>
                             </div>
                         <?php endif; ?>
                         <form action="controladores/login_controller.php" method="POST">
@@ -72,6 +83,9 @@ if (isset($_SESSION['login_error'])) {
                             </div>
                             <div class="d-grid">
                                 <button type="submit" class="btn btn-danger btn-lg">Entrar</button>
+                            </div>
+                            <div class="text-center mt-3">
+                                <a href="vistas/forgot_password.php">¿Olvidaste tu contraseña?</a>
                             </div>
                         </form>
                     </div>
