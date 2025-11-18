@@ -64,5 +64,27 @@
   })
 })()
 </script>
+
+<!-- Toastify JS -->
+<script src="../../assets/js/toastify.min.js"></script>
+<script src="../../assets/js/notificaciones.js"></script>
+
+<!-- Script para mostrar notificaciones desde la sesión de PHP -->
+<?php
+if (isset($_SESSION['status_message'])) {
+    $message = $_SESSION['status_message'];
+    $type = $_SESSION['status_type'];
+    // Limpiar para que no se muestre de nuevo
+    unset($_SESSION['status_message']);
+    unset($_SESSION['status_type']);
+
+    echo "<script>
+        document.addEventListener('DOMContentLoaded', function() {
+            mostrarNotificacion('" . addslashes($message) . "', '" . addslashes($type) . "');
+        });
+    </script>";
+}
+?>
+
 </body>
 </html>
