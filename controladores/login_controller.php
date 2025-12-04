@@ -48,13 +48,13 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             exit();
         } else {
             // Contraseña incorrecta
-            $_SESSION['login_error'] = "Usuario o contraseña incorrectos.";
+            $_SESSION['login_error'] = "DEBUG: La contraseña no coincide.";
             header("Location: ../index.php");
             exit();
         }
     } else {
         // Usuario no encontrado o inactivo
-        $_SESSION['login_error'] = "Usuario o contraseña incorrectos.";
+        $_SESSION['login_error'] = "DEBUG: Usuario no encontrado o está inactivo.";
         header("Location: ../index.php");
         exit();
     }
