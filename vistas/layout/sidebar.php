@@ -15,7 +15,7 @@ if (isset($_SESSION['rol'])) {
         case 'admin':
             ?>
             <a href="dashboard.php" class="list-group-item list-group-item-action <?php echo isActive('dashboard.php', $current_page); ?>">
-                <i class="fas fa-tachometer-alt me-2"></i>Dashboard
+                <i class="fas fa-tachometer-alt me-2"></i>Inicio
             </a>
             <a href="gestionar_estudiantes.php" class="list-group-item list-group-item-action <?php echo isActive('gestionar_estudiantes.php', $current_page); ?>">
                 <i class="fas fa-user-graduate me-2"></i>Estudiantes
@@ -46,7 +46,7 @@ if (isset($_SESSION['rol'])) {
         case 'docente':
             ?>
             <a href="dashboard.php" class="list-group-item list-group-item-action <?php echo isActive('dashboard.php', $current_page); ?>">
-                <i class="fas fa-tachometer-alt me-2"></i>Dashboard
+                <i class="fas fa-tachometer-alt me-2"></i>Inicio
             </a>
             <a href="mis_cursos.php" class="list-group-item list-group-item-action <?php echo isActive('mis_cursos.php', $current_page); ?>">
                 <i class="fas fa-book me-2"></i>Mis Cursos
@@ -68,7 +68,7 @@ if (isset($_SESSION['rol'])) {
         case 'estudiante':
             ?>
             <a href="dashboard.php" class="list-group-item list-group-item-action <?php echo isActive('dashboard.php', $current_page); ?>">
-                <i class="fas fa-tachometer-alt me-2"></i>Dashboard
+                <i class="fas fa-tachometer-alt me-2"></i>Inicio
             </a>
             <a href="mis_calificaciones.php" class="list-group-item list-group-item-action <?php echo isActive('mis_calificaciones.php', $current_page); ?>">
                 <i class="fas fa-graduation-cap me-2"></i>Mis Calificaciones

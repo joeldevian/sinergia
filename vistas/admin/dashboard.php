@@ -1,6 +1,6 @@
 <?php require_once 'layout/header.php'; ?>
 
-<h1 class="mb-4">Dashboard Profesional</h1>
+
 
 <!-- Fila de Indicadores Clave (KPIs) -->
 <div class="row">
