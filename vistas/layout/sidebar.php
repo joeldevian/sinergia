@@ -70,6 +70,9 @@ if (isset($_SESSION['rol'])) {
             <a href="dashboard.php" class="list-group-item list-group-item-action <?php echo isActive('dashboard.php', $current_page); ?>">
                 <i class="fas fa-tachometer-alt me-2"></i>Inicio
             </a>
+            <a href="mis_cursos.php" class="list-group-item list-group-item-action <?php echo isActive('mis_cursos.php', $current_page); ?>">
+                <i class="fas fa-book-open me-2"></i>Mis Cursos
+            </a>
             <a href="mis_calificaciones.php" class="list-group-item list-group-item-action <?php echo isActive('mis_calificaciones.php', $current_page); ?>">
                 <i class="fas fa-graduation-cap me-2"></i>Mis Calificaciones
             </a>

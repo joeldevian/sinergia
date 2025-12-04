@@ -1,6 +1,20 @@
 <?php require_once 'layout/header.php'; ?>
 
-<h1 class="mb-4">Mi Dashboard</h1>
+<?php
+require_once '../../config/database.php'; // Cargar funciones de la base de datos
+$nombre_estudiante = 'Estudiante'; // Valor por defecto en caso de no encontrar el nombre
+if (isset($_SESSION['user_id'])) {
+    $estudiante_data = select_one(
+        "SELECT nombres, apellido_paterno FROM estudiantes WHERE id_user = ? LIMIT 1", 
+        "i", 
+        [$_SESSION['user_id']]
+    );
+    if ($estudiante_data) {
+        $nombre_estudiante = htmlspecialchars($estudiante_data['nombres'] . ' ' . $estudiante_data['apellido_paterno']);
+    }
+}
+?>
+<h2 class="mb-4 text-muted">Bienvenido/a estudiante, <?php echo $nombre_estudiante; ?></h2>
 
 <!-- Fila de Indicadores Clave (KPIs) -->
 <div class="row">

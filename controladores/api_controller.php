@@ -317,7 +317,7 @@ function obtenerKpisEstudiante() {
         $id_estudiante = obtenerIdEstudianteDeSesion();
         if ($id_estudiante === null) throw new Exception("No se pudo encontrar el perfil del estudiante.");
 
-        $sql_cursos = "SELECT COUNT(id) as total FROM matriculas WHERE id_estudiante = ? AND estado = 'matriculado'";
+        $sql_cursos = "SELECT COUNT(id) as total FROM matriculas WHERE id_estudiante = ? AND estado = 'activo'";
         $total_cursos = select_one($sql_cursos, "i", [$id_estudiante])['total'] ?? 0;
 
         $sql_promedio = "SELECT AVG(nota) as promedio FROM notas WHERE id_estudiante = ?";

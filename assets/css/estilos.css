@@ -338,16 +338,30 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 .card-horario {
-    background-color: #26C6DA; /* Cian */
-    color: var(--dark-text);
+    background-color: var(--primary-red);
+    color: var(--white); /* Color por defecto para el texto dentro, como el header */
 }
+
 .card-horario .card-header {
-    background-color: rgba(0,0,0,0.1);
-    color: var(--dark-text);
-    border-bottom: 1px solid rgba(0,0,0,0.1);
+    background-color: transparent;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+    color: var(--white); /* El color ya es blanco, pero es bueno ser explícito */
 }
-.card-horario .btn-light {
-    color: #26C6DA;
+
+.card-horario .card-body {
+    background-color: var(--white);
+    color: var(--dark-text); /* El texto dentro del body será oscuro */
+}
+
+/* Los párrafos y textos en negrita dentro del cuerpo deben ser oscuros */
+.card-horario .card-body p,
+.card-horario .card-body strong {
+    color: var(--dark-text);
+}
+
+.card-horario:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 15px -2px rgba(0, 0, 0, 0.2);
 }
 
 .card-asistencia {
@@ -375,6 +389,8 @@ h1, h2, h3, h4, h5, h6 {
 .card-pagos .btn-light {
     color: #FFCA28;
 }
+
+
 
 /* Asegurar que todas las tarjetas en una fila tengan la misma altura */
 .row .card {

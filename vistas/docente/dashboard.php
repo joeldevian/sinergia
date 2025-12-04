@@ -1,6 +1,20 @@
 <?php require_once 'layout/header.php'; ?>
 
-<h1 class="mb-4">Dashboard del Docente</h1>
+<?php
+require_once '../../config/database.php'; // Cargar funciones de la base de datos
+$nombre_docente = 'Docente'; // Valor por defecto en caso de no encontrar el nombre
+if (isset($_SESSION['user_id'])) {
+    $docente_data = select_one(
+        "SELECT nombres, apellido_paterno FROM docentes WHERE id_user = ? LIMIT 1", 
+        "i", 
+        [$_SESSION['user_id']]
+    );
+    if ($docente_data) {
+        $nombre_docente = htmlspecialchars($docente_data['nombres'] . ' ' . $docente_data['apellido_paterno']);
+    }
+}
+?>
+<h2 class="mb-4 text-muted">Bienvenido/a Docente, <?php echo $nombre_docente; ?></h2>
 
 <!-- Fila de Indicadores Clave (KPIs) -->
 <div class="row">

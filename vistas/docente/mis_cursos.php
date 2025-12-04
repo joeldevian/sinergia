@@ -85,6 +85,9 @@ if (isset($_SESSION['mensaje'])) {
                                     <a href="gestionar_asistencia_curso.php?id_curso=<?php echo $curso['id']; ?>" class="btn btn-sm btn-primary" title="Gestionar Asistencia">
                                         <i class="fas fa-clipboard-check"></i> Asistencia
                                     </a>
+                                    <a href="ver_lista_estudiantes.php?id_curso=<?php echo $curso['id']; ?>" class="btn btn-sm btn-success mt-1" title="Ver Lista de Estudiantes">
+                                        <i class="fas fa-users"></i> Ver Lista
+                                    </a>
                                     <a href="../../controladores/generar_listado_estudiantes_curso_pdf.php?id_curso=<?php echo $curso['id']; ?>" class="btn btn-sm btn-secondary mt-1" title="Exportar Estudiantes a PDF" target="_blank">
                                         <i class="fas fa-file-pdf"></i> Descargar
                                     </a>
