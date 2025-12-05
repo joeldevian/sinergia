@@ -18,27 +18,50 @@ $stmt_estudiante_id->close();
 
 $pensiones = [];
 if ($id_estudiante > 0) {
-    $query_pensiones = "SELECT 
-                            p.id,
-                            p.periodo_academico,
-                            p.monto,
-                            p.fecha_vencimiento,
-                            p.estado,
-                            SUM(CASE WHEN pa.id IS NOT NULL THEN pa.monto_pagado ELSE 0 END) AS monto_pagado_acumulado
-                        FROM pensiones p
-                        LEFT JOIN pagos pa ON p.id = pa.id_pension
-                        WHERE p.id_estudiante = ?
-                        GROUP BY p.id
-                        ORDER BY p.fecha_vencimiento ASC";
-    $stmt_pensiones = $conexion->prepare($query_pensiones);
-    $stmt_pensiones->bind_param("i", $id_estudiante);
-    $stmt_pensiones->execute();
-    $resultado_pensiones = $stmt_pensiones->get_result();
+    // 1. Obtener el monto total pagado por el estudiante
+    $stmt_total_pagado = $conexion->prepare("SELECT SUM(monto) as total FROM pagos WHERE id_estudiante = ? AND estado = 'válido'");
+    $stmt_total_pagado->bind_param("i", $id_estudiante);
+    $stmt_total_pagado->execute();
+    $resultado_total_pagado = $stmt_total_pagado->get_result();
+    $total_pagado = $resultado_total_pagado->fetch_assoc()['total'] ?? 0;
+    $stmt_total_pagado->close();
 
-    while ($pension = $resultado_pensiones->fetch_assoc()) {
+    // 2. Obtener todas las pensiones del estudiante
+    $query_pensiones_base = "SELECT
+                                p.id,
+                                p.periodo_academico,
+                                p.monto,
+                                p.fecha_vencimiento,
+                                p.estado
+                            FROM pensiones p
+                            WHERE p.id_estudiante = ?
+                            ORDER BY p.fecha_vencimiento ASC"; // Ordenar para aplicar pagos cronológicamente
+
+    $stmt_pensiones_base = $conexion->prepare($query_pensiones_base);
+    $stmt_pensiones_base->bind_param("i", $id_estudiante);
+    $stmt_pensiones_base->execute();
+    $resultado_pensiones_base = $stmt_pensiones_base->get_result();
+
+    $pensiones_raw = [];
+    while ($pension = $resultado_pensiones_base->fetch_assoc()) {
+        $pensiones_raw[] = $pension;
+    }
+    $stmt_pensiones_base->close();
+
+    // 3. Distribuir el total pagado entre las pensiones en PHP
+    $saldo_pagos_disponible = $total_pagado;
+    foreach ($pensiones_raw as $pension) {
+        $monto_a_pagar_esta_pension = $pension['monto'];
+        $pagado_para_esta_pension = 0;
+
+        if ($saldo_pagos_disponible > 0) {
+            $pagado_para_esta_pension = min($saldo_pagos_disponible, $monto_a_pagar_esta_pension);
+            $saldo_pagos_disponible -= $pagado_para_esta_pension;
+        }
+        
+        $pension['monto_pagado_acumulado'] = $pagado_para_esta_pension;
         $pensiones[] = $pension;
     }
-    $stmt_pensiones->close();
 }
 ?>
 

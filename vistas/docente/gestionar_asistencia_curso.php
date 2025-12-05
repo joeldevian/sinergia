@@ -3,6 +3,7 @@ $includeDataTablesCss = true;
 $includeDataTablesJs = true;
 require_once 'layout/header.php';
 require_once '../../config/conexion.php';
+require_once '../../controladores/asistencia_reporte_controller.php';
 
 $id_curso = $_GET['id_curso'] ?? 0;
 $fecha_seleccionada = $_GET['fecha'] ?? date('Y-m-d');
@@ -33,7 +34,7 @@ if (!$curso) {
 $query_estudiantes = "SELECT e.id, CONCAT(e.nombres, ' ', e.apellido_paterno, ' ', e.apellido_materno) AS nombre_completo
                       FROM matriculas m
                       JOIN estudiantes e ON m.id_estudiante = e.id
-                      WHERE m.id_curso = ? AND m.estado = 'matriculado'
+                      WHERE m.id_curso = ?
                       ORDER BY nombre_completo ASC";
 $stmt_estudiantes = $conexion->prepare($query_estudiantes);
 $stmt_estudiantes->bind_param("i", $id_curso);
@@ -95,6 +96,12 @@ if (isset($_SESSION['mensaje'])) {
             </div>
             <div class="col-auto">
                 <button type="submit" class="btn btn-primary">Ver Asistencia</button>
+            </div>
+            <div class="col-auto">
+                <a href="../../controladores/generar_asistencia_pdf.php?id_curso=<?php echo $id_curso; ?>&fecha=<?php echo htmlspecialchars($fecha_seleccionada); ?>" class="btn btn-secondary" target="_blank">Exportar Asistencia (PDF)</a>
+            </div>
+            <div class="col-auto">
+                <a href="reporte_asistencia_consolidado.php?id_curso=<?php echo $id_curso; ?>&fecha=<?php echo htmlspecialchars($fecha_seleccionada); ?>" class="btn btn-info">Ver Reporte Consolidado</a>
             </div>
         </form>
     </div>
