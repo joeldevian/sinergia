@@ -24,37 +24,59 @@ switch ($accion) {
 function agregarMatricula() {
     try {
         $id_estudiante = $_POST['id_estudiante'];
-        $id_curso = $_POST['id_curso'];
+        $id_cursos = $_POST['id_cursos'] ?? [];
         $periodo_academico = $_POST['periodo_academico'];
         $fecha_matricula = $_POST['fecha_matricula'];
 
-        // Check for duplicate enrollment
-        $sql_check = "SELECT COUNT(*) as count FROM matriculas WHERE id_estudiante = ? AND id_curso = ? AND periodo_academico = ?";
-        $result = select_one($sql_check, "iis", [$id_estudiante, $id_curso, $periodo_academico]);
-
-        if ($result && $result['count'] > 0) {
-            $_SESSION['mensaje'] = "Error: El estudiante ya está matriculado en este curso para el periodo académico seleccionado.";
-            $_SESSION['mensaje_tipo'] = "danger";
-            header("Location: ../vistas/admin/gestionar_matriculas.php");
-            exit();
+        if (empty($id_cursos)) {
+            throw new Exception("Debe seleccionar al menos un curso.");
         }
 
-        $sql_insert = "INSERT INTO matriculas (id_estudiante, id_curso, periodo_academico, fecha_matricula) 
-                       VALUES (?, ?, ?, ?)";
-        if (!execute_cud($sql_insert, "iiss", [$id_estudiante, $id_curso, $periodo_academico, $fecha_matricula])) {
-            throw new Exception("No se pudo agregar la matrícula.");
+        $cursos_agregados_ids = [];
+        $cursos_omitidos_ids = [];
+
+        foreach ($id_cursos as $id_curso) {
+            // Check for duplicate enrollment
+            $sql_check = "SELECT COUNT(*) as count FROM matriculas WHERE id_estudiante = ? AND id_curso = ? AND periodo_academico = ?";
+            $result = select_one($sql_check, "iis", [$id_estudiante, $id_curso, $periodo_academico]);
+
+            if ($result && $result['count'] > 0) {
+                $cursos_omitidos_ids[] = $id_curso;
+                continue; // Skip to the next course
+            }
+
+            // Insert new enrollment
+            $sql_insert = "INSERT INTO matriculas (id_estudiante, id_curso, periodo_academico, fecha_matricula) 
+                           VALUES (?, ?, ?, ?)";
+            if (execute_cud($sql_insert, "iiss", [$id_estudiante, $id_curso, $periodo_academico, $fecha_matricula])) {
+                $cursos_agregados_ids[] = $id_curso;
+            }
         }
 
-        $_SESSION['mensaje'] = "Matrícula agregada exitosamente.";
-        $_SESSION['mensaje_tipo'] = "success";
+        $mensaje = "Operación completada. Matrículas agregadas: " . count($cursos_agregados_ids) . ".";
+        if (!empty($cursos_omitidos_ids)) {
+            $mensaje .= " Cursos omitidos por duplicado: " . count($cursos_omitidos_ids) . ".";
+        }
+
+        // Store summary in session for the confirmation page
+        $_SESSION['matricula_summary'] = [
+            'id_estudiante' => $id_estudiante,
+            'periodo_academico' => $periodo_academico,
+            'fecha_matricula' => $fecha_matricula,
+            'cursos_matriculados_ids' => $cursos_agregados_ids,
+            'mensaje' => $mensaje,
+            'mensaje_tipo' => (count($cursos_agregados_ids) > 0) ? "success" : "warning"
+        ];
+        
+        header("Location: ../vistas/admin/confirmacion_matricula.php");
+        exit();
 
     } catch (Exception $e) {
         $_SESSION['mensaje'] = "Error al agregar matrícula: " . $e->getMessage();
         $_SESSION['mensaje_tipo'] = "danger";
+        header("Location: ../vistas/admin/gestionar_matriculas.php");
+        exit();
     }
-
-    header("Location: ../vistas/admin/gestionar_matriculas.php");
-    exit();
 }
 
 function editarMatricula() {

@@ -13,6 +13,7 @@
 <script src="https://code.jquery.com/jquery-3.7.0.js"></script>
 <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
 <script src="https://cdn.datatables.net/1.13.6/js/dataTables.bootstrap5.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
 <!-- DataTables Initialization Script -->
 <script>
     $(document).ready(function() {
@@ -71,15 +72,17 @@
 
 <!-- Script para mostrar notificaciones desde la sesión de PHP -->
 <?php
-if (isset($_SESSION['status_message'])) {
-    $message = $_SESSION['status_message'];
-    $type = $_SESSION['status_type'];
+if (isset($_SESSION['mensaje'])) {
+    $message = $_SESSION['mensaje'];
+    $type = $_SESSION['mensaje_tipo'] ?? 'info'; // Default to 'info' if type is not set
     // Limpiar para que no se muestre de nuevo
-    unset($_SESSION['status_message']);
-    unset($_SESSION['status_type']);
+    unset($_SESSION['mensaje']);
+    unset($_SESSION['mensaje_tipo']);
 
     echo "<script>
         document.addEventListener('DOMContentLoaded', function() {
+            // Asumimos que la función mostrarNotificacion ya existe en notificaciones.js
+            // y que puede manejar tipos como 'success', 'danger', 'info', 'warning'
             mostrarNotificacion('" . addslashes($message) . "', '" . addslashes($type) . "');
         });
     </script>";

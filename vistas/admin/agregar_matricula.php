@@ -31,10 +31,9 @@ $cursos = select_all($query_cursos); // Usando select_all() de database.php
                     </select>
                 </div>
                 <div class="col-md-6 mb-3">
-                    <label for="id_curso" class="form-label">Curso</label>
-                    <select class="form-select" id="id_curso" name="id_curso" required>
-                        <option value="">Seleccione un curso</option>
-                        <?php foreach($cursos as $curso): // Cambiado de while a foreach ?>
+                    <label for="id_cursos" class="form-label">Cursos</label>
+                    <select class="form-select" id="id_cursos" name="id_cursos[]" multiple required>
+                        <?php foreach($cursos as $curso): ?>
                             <option value="<?php echo $curso['id']; ?>"><?php echo htmlspecialchars($curso['nombre_curso']); ?></option>
                         <?php endforeach; ?>
                     </select>
@@ -61,3 +60,21 @@ $cursos = select_all($query_cursos); // Usando select_all() de database.php
 // $conexion->close(); // Eliminado
 require_once 'layout/footer.php';
 ?>
+
+<script>
+$(document).ready(function() {
+    // Inicializar Select2 en el selector de estudiantes
+    $('#id_estudiante').select2({
+        placeholder: 'Seleccione un estudiante',
+        allowClear: true,
+        width: '100%'
+    });
+
+    // Inicializar Select2 en el selector de cursos
+    $('#id_cursos').select2({
+        placeholder: 'Seleccione uno o varios cursos',
+        allowClear: true,
+        width: '100%'
+    });
+});
+</script>

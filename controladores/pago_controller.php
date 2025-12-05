@@ -8,14 +8,10 @@ if (!isset($_SESSION['user_id']) || $_SESSION['rol'] !== 'admin') {
 }
 
 $accion = $_POST['accion'] ?? $_GET['accion'] ?? '';
-$id_estudiante_redirect = $_POST['id_estudiante'] ?? $_GET['id_estudiante'] ?? 0;
 
 switch ($accion) {
-    case 'agregar_pension':
-        agregarPension($id_estudiante_redirect);
-        break;
-    case 'agregar_pago':
-        agregarPago($id_estudiante_redirect);
+    case 'agregar_pago_general':
+        agregarPagoGeneral();
         break;
     default:
         $_SESSION['mensaje'] = "Acción no válida.";
@@ -24,69 +20,48 @@ switch ($accion) {
         exit();
 }
 
-function agregarPension($id_estudiante) {
+function agregarPagoGeneral() {
     try {
-        $periodo = trim($_POST['periodo_academico'] ?? '');
-        $monto = filter_var($_POST['monto'] ?? '', FILTER_VALIDATE_FLOAT);
-        $fecha_vencimiento = $_POST['fecha_vencimiento'] ?? '';
-
-        if (empty($periodo) || $monto === false || $monto <= 0 || empty($fecha_vencimiento)) {
-            throw new Exception("Todos los campos son requeridos y el monto debe ser un número positivo.");
-        }
-
-        $sql = "INSERT INTO pensiones (id_estudiante, periodo_academico, monto, fecha_vencimiento, estado) VALUES (?, ?, ?, ?, 'pendiente')";
-        
-        if (!execute_cud($sql, "isds", [$id_estudiante, $periodo, $monto, $fecha_vencimiento])) {
-            throw new Exception("No se pudo asignar la nueva pensión.");
-        }
-
-        $_SESSION['mensaje'] = "Pensión asignada exitosamente.";
-        $_SESSION['mensaje_tipo'] = "success";
-
-    } catch (Exception $e) {
-        $_SESSION['mensaje'] = "Error al asignar la pensión: " . $e->getMessage();
-        $_SESSION['mensaje_tipo'] = "danger";
-    }
-
-    header("Location: ../vistas/admin/detalle_pagos_estudiante.php?id_estudiante=" . $id_estudiante);
-    exit();
-}
-
-function agregarPago($id_estudiante) {
-    try {
-        $id_pension = filter_var($_POST['id_pension'] ?? '', FILTER_VALIDATE_INT);
-        $monto_pagado = filter_var($_POST['monto_pagado'] ?? '', FILTER_VALIDATE_FLOAT);
+        // 1. Recoger y validar datos
+        $id_estudiante = filter_input(INPUT_POST, 'id_estudiante', FILTER_VALIDATE_INT);
+        $concepto = trim($_POST['concepto'] ?? '');
+        $monto = filter_input(INPUT_POST, 'monto', FILTER_VALIDATE_FLOAT);
         $fecha_pago = $_POST['fecha_pago'] ?? '';
         $metodo_pago = trim($_POST['metodo_pago'] ?? '');
 
-        if ($id_pension === false || $monto_pagado === false || $monto_pagado <= 0 || empty($fecha_pago) || empty($metodo_pago)) {
+        if (!$id_estudiante || empty($concepto) || $monto === false || $monto <= 0 || empty($fecha_pago) || empty($metodo_pago)) {
             throw new Exception("Todos los campos son requeridos y el monto debe ser un número positivo.");
         }
 
-        // Opcional: Validar que el monto pagado no exceda el saldo pendiente de la pensión
-        $pension_info = select_one("SELECT monto FROM pensiones WHERE id = ?", "i", [$id_pension]);
-        $pagos_previos = select_one("SELECT SUM(monto_pagado) as total_pagado FROM pagos WHERE id_pension = ?", "i", [$id_pension]);
-        $saldo_pendiente = $pension_info['monto'] - ($pagos_previos['total_pagado'] ?? 0);
+        // 2. Generar número de recibo único
+        $last_receipt = select_one("SELECT numero_recibo FROM pagos ORDER BY CAST(SUBSTRING(numero_recibo, 3) AS UNSIGNED) DESC LIMIT 1");
+        $next_receipt_num = $last_receipt ? ((int)substr($last_receipt['numero_recibo'], 2)) + 1 : 1;
+        $numero_recibo = 'R-' . str_pad($next_receipt_num, 6, '0', STR_PAD_LEFT);
 
-        if ($monto_pagado > $saldo_pendiente) {
-            throw new Exception("El monto a pagar (S/ " . number_format($monto_pagado, 2) . ") no puede ser mayor que el saldo pendiente (S/ " . number_format($saldo_pendiente, 2) . ").");
-        }
-
-        $sql = "INSERT INTO pagos (id_pension, monto_pagado, fecha_pago, metodo_pago) VALUES (?, ?, ?, ?)";
+        // 3. Insertar el nuevo pago en la base de datos (usando la nueva estructura)
+        $sql = "INSERT INTO pagos (id_estudiante, numero_recibo, concepto, monto, fecha_pago, metodo_pago, estado) 
+                VALUES (?, ?, ?, ?, ?, ?, 'válido')";
         
-        if (!execute_cud($sql, "idss", [$id_pension, $monto_pagado, $fecha_pago, $metodo_pago])) {
-            throw new Exception("No se pudo registrar el pago.");
+        $pago_id = execute_cud($sql, "issdss", [$id_estudiante, $numero_recibo, $concepto, $monto, $fecha_pago, $metodo_pago], true);
+
+        if (!$pago_id) {
+            throw new Exception("No se pudo registrar el pago en la base de datos.");
         }
 
-        $_SESSION['mensaje'] = "Pago registrado exitosamente.";
-        $_SESSION['mensaje_tipo'] = "success";
+        // 4. Guardar ID en sesión y redirigir a la página de confirmación
+        $_SESSION['pago_summary'] = [
+            'pago_id' => $pago_id
+        ];
+
+        header("Location: ../vistas/admin/confirmacion_pago.php");
+        exit();
 
     } catch (Exception $e) {
         $_SESSION['mensaje'] = "Error al registrar el pago: " . $e->getMessage();
         $_SESSION['mensaje_tipo'] = "danger";
+        // Redirigir de vuelta al formulario de pago en caso de error
+        header("Location: ../vistas/admin/agregar_pago.php");
+        exit();
     }
-
-    header("Location: ../vistas/admin/detalle_pagos_estudiante.php?id_estudiante=" . $id_estudiante);
-    exit();
 }
 ?>

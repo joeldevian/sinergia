@@ -409,19 +409,14 @@ function obtenerResumenAsistenciaEstudiante() {
 
 function obtenerKpisPagos() {
     try {
-        $sql_ingresos = "SELECT SUM(monto_pagado) as total FROM pagos";
+        // Con el nuevo sistema, solo podemos calcular los ingresos totales directamente.
+        $sql_ingresos = "SELECT SUM(monto) as total FROM pagos WHERE estado = 'válido'";
         $ingresos_totales = select_one($sql_ingresos)['total'] ?? 0;
-
-        $sql_adeudado = "SELECT SUM(monto) as total FROM pensiones";
-        $total_adeudado = select_one($sql_adeudado)['total'] ?? 0;
-        
-        $saldo_pendiente = $total_adeudado - $ingresos_totales;
-        $tasa_cobranza = ($total_adeudado > 0) ? round(($ingresos_totales / $total_adeudado) * 100) : 0;
 
         echo json_encode([
             'ingresos_totales' => $ingresos_totales,
-            'saldo_pendiente' => $saldo_pendiente,
-            'tasa_cobranza' => $tasa_cobranza
+            'saldo_pendiente' => 0, // Obsoleto en el nuevo modelo
+            'tasa_cobranza' => 100 // Obsoleto en el nuevo modelo
         ]);
     } catch (Exception $e) {
         http_response_code(500);
@@ -431,9 +426,13 @@ function obtenerKpisPagos() {
 
 function obtenerIngresosPorMes() {
     try {
+        // Adaptado a la nueva tabla de pagos
         $sql = "
-            SELECT YEAR(fecha_pago) as anio, MONTH(fecha_pago) as mes, SUM(monto_pagado) as total
-            FROM pagos GROUP BY anio, mes ORDER BY anio, mes;
+            SELECT YEAR(fecha_pago) as anio, MONTH(fecha_pago) as mes, SUM(monto) as total
+            FROM pagos 
+            WHERE estado = 'válido'
+            GROUP BY anio, mes 
+            ORDER BY anio, mes;
         ";
         $resultado = select_all($sql);
         $labels = []; $data = [];
@@ -450,36 +449,8 @@ function obtenerIngresosPorMes() {
 }
 
 function obtenerResumenEstadoPensiones() {
-    try {
-        $sql = "
-            SELECT 
-                p.id, p.monto, p.fecha_vencimiento,
-                COALESCE(SUM(pa.monto_pagado), 0) as total_pagado
-            FROM pensiones p
-            LEFT JOIN pagos pa ON p.id = pa.id_pension
-            GROUP BY p.id;
-        ";
-        $resultado = select_all($sql);
-        
-        $estados = ['Pagado' => 0, 'Pendiente' => 0, 'Vencido' => 0];
-        foreach($resultado as $pension) {
-            $saldo = $pension['monto'] - $pension['total_pagado'];
-            if ($saldo <= 0) {
-                $estados['Pagado']++;
-            } elseif (strtotime($pension['fecha_vencimiento']) < time()) {
-                $estados['Vencido']++;
-            } else {
-                $estados['Pendiente']++;
-            }
-        }
-
-        echo json_encode([
-            'labels' => array_keys($estados),
-            'data' => array_values($estados)
-        ]);
-    } catch (Exception $e) {
-        http_response_code(500);
-        echo json_encode(['error' => 'Error al obtener estado de pensiones: ' . $e->getMessage()]);
-    }
+    // Esta función es obsoleta con el nuevo sistema de pagos genéricos.
+    // Se devuelve una respuesta vacía para evitar errores en el frontend si aún se llama.
+    echo json_encode(['labels' => [], 'data' => []]);
 }
 ?>
